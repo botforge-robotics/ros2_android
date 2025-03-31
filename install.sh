@@ -69,6 +69,8 @@ locale-gen en_US en_US.UTF-8 || error_exit "Failed to generate locale"
 update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 || error_exit "Failed to update locale"
 export LANG=en_US.UTF-8
 
+#install net tools
+apt install net-tools -y || error_exit "Failed to install net-tools"
 # Verify locale settings
 locale  # verify settings
 
@@ -127,6 +129,12 @@ info_message "Setting up RIO workspace..."
 mkdir -p ~/rio_ws/src || error_exit "Failed to create RIO workspace directory"
 cd ~/rio_ws/src || error_exit "Failed to change to RIO workspace directory"
 git clone https://github.com/botforge-robotics/rio_ros2.git || error_exit "Failed to clone RIO repository"
+
+#install dependencies
+info_message "Installing dependencies..."
+pip install opencv-python aiortc aiohttp_cors ollama aiohttp || error_exit "Failed to install dependencies"
+curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"
+ollama pull gemma2:2b || error_exit "Failed to pull gemma2:2b model"
 
 # Build RIO packages
 info_message "Building RIO packages..."
