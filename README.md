@@ -1,4 +1,3 @@
-
 <div align="center">
 <img src="https://img.shields.io/badge/ROS2-Humble-blue" alt="ROS2"/>
 <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
@@ -8,8 +7,6 @@
 
 
 *Run ROS 2 Humble, Micro-ROS, Ollama and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
-
-</div>
 
 ---
 
@@ -78,6 +75,8 @@ The installation process will:
 - 🚀 Set up RIO ROS2 packages
 - ⚙️ Configure all environments
 
+
+
 ## 📝 Post-Installation
 
 After successful installation:
@@ -87,7 +86,6 @@ After successful installation:
 
 
 ---
-
 
 
 ## 📱 Using ROS2Sense Mobile App
@@ -107,11 +105,114 @@ ROS2Sense transforms your smartphone into a powerful ROS 2 sensor hub, providing
 - 📲 Display Output – Use your mobile screen for animated robotic expressions
 - Inbuilt Madgwick Filter for IMU data fusion, Hotword Detection.
 
+### Download ROS2Sense from [Google Play Store](https://play.google.com/store/apps/details?id=com.botforge.rio)
+<div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 25px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/connectionScreen.jpeg" alt="Connection Interface" style=" border-radius: 10px; max-width: 100%;">
+    </div>
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/listening.jpg" alt="Listening Mode" style=" border-radius: 10px; max-width: 100%;">
+    </div>
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/speaking.jpg" alt="Speaking Mode" style=" border-radius: 10px; max-width: 100%;">
+    </div>
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/settings1.jpg" alt="Settings Page 1" style="border-radius: 10px;max-width: 100%;">
+    </div>
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/settings2.jpg" alt="Settings Page 2" style="border-radius: 10px; max-width: 100%;">
+    </div>
+    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
+        <img src="./images/settings3.jpg" alt="Settings Page 3" style=" border-radius: 10px;  max-width: 100%;">
+    </div>
+</div>
+---
+## 🚀 Usage
 
-### Setup Instructions 🔧
-1. Download ROS2Sense from [Google Play Store](https://play.google.com/store/apps/details?id=com.botforge.rio)
-2. Enter 0.0.0.0 as ROS_IP as ros2 is running on the same device.
-   
+
+##### 1. On Mobile Device (Before launching any nodes) 📱
+```bash
+# Set in Ubuntu terminal
+export ROS_DOMAIN_ID=0  # Choose any number between 0-232
+export ROS_LOCALHOST_ONLY=0  # Enable non-localhost communication
+```
+or export to .bashrc for permanent use
+```bash
+echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
+echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
+```
+
+##### 2.1 Mobile Nodes Launch
+The mobile nodes launch file (`mobile_nodes.launch.py`) starts components related to the smartphone functionality:
+
+```bash
+# Launch mobile-related nodes
+ros2 launch rio_bringup mobile_nodes.launch.py
+```
+
+This launch file includes:
+- **Ollama NLP Node**: Natural language processing for robot interactions
+- **WebRTC Node**: Video streaming server (port 8080)
+- **Rosbridge WebSocket**: Enables ROS2-to-WebSocket communication
+
+#### 2.2 PCB Nodes Launch
+The PCB nodes launch file (`pcb_nodes.launch.py`) manages hardware-related components:
+
+```bash
+# Launch PCB-related nodes
+ros2 launch rio_bringup pcb_nodes.launch.py agent_port:=8888
+```
+
+**PCB Launch Parameters**:
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `agent_port` | Micro-ROS agent UDP port | `8888` |
+
+This launch file includes:
+- **Micro-ROS Agent**: Handles communication with ESP32
+- **Odometry TF Broadcaster**: Publishes transform data
+- **LIDAR UDP Node**: Manages LIDAR sensor data
+
+##### 2.3 Real Robot (Mobile+PCB) Launch
+
+```bash
+# Launch real robot nodes
+ros2 launch rio_bringup rio_real_robot.launch.py \
+  use_sim_time:=false \
+  agent_port:=8888
+```
+
+**Real Robot Parameters**:
+| Parameter | Description | Default Value | Options |
+|-----------|-------------|---------------|---------|
+| `use_sim_time` | Use simulation clock (must be false for real hardware) | `false` | `true`/`false` |
+| `agent_port` | Micro-ROS agent UDP port | `8888` | Any available port number |
+
+> 📝 **Note:** Make sure to set up the domain and network configuration before launching any nodes to ensure proper communication between components.
+
+#### 3. In ROS2Sense App 📱
+- Enter `0.0.0.0` as ROS2 Bridge IP on connecting screen (since ROS2 is running on same device) only if `mobile_nodes.launch.py` or `rio_real_robot.launch.py` is launched.
+
+#### 4. On Desktop PC with ROS2 Humble installed 💻
+
+```bash
+# Set in Ubuntu terminal
+export ROS_DOMAIN_ID=0  # Choose any number between 0-232
+export ROS_LOCALHOST_ONLY=0  # Enable non-localhost communication
+```
+or export to .bashrc for permanent use
+```bash
+echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
+echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
+```
+
+check topics published by mobile nodes
+```bash
+ros2 topic list
+```
+
+
+
 ---
 
 ### 🌐 ROS Domain Setup for Remote Communication
@@ -131,6 +232,7 @@ To enable communication between your mobile device (running ROS 2 in Termux/Ubun
    ```
 
 > 🔒 **Note:** For security, use unique domain IDs when multiple ROS 2 systems are on the same network to prevent unintended cross-communication.
+
 
 ---
 
