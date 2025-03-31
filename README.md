@@ -24,6 +24,9 @@ This repository contains scripts to install and run ROS 2 Humble on Android devi
 
 1. Open Termux and run:
 ```bash
+pkg update -y
+pkg upgrade -y
+pkg install wget -y
 wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/install.sh
 chmod +x install.sh
 ./install.sh

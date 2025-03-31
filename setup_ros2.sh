@@ -32,33 +32,6 @@ if [ "$EUID" -eq 0 ]; then
     error_exit "Please do not run as root"
 fi
 
-echo -e "${GREEN}Starting installation of Ubuntu 22.04 and ROS 2 Humble on Termux...${NC}"
-
-# Install neofetch and show system info
-info_message "Installing neofetch and updating system..."
-pkg install neofetch -y || error_exit "Failed to install neofetch"
-apt update -y && apt upgrade -y || error_exit "Failed to update system"
-neofetch
-
-# Install required packages
-info_message "Installing required packages..."
-pkg update -y || error_exit "Failed to update pkg"
-pkg install wget curl proot tar -y || error_exit "Failed to install required packages"
-
-# Install net-tools
-info_message "Installing net-tools..."
-apt install net-tools -y || error_exit "Failed to install net-tools"
-
-# Download and setup Ubuntu 22.04
-info_message "Downloading Ubuntu 22.04 setup script..."
-wget https://raw.githubusercontent.com/AndronixApp/AndronixOrigin/master/Installer/Ubuntu22/ubuntu22.sh -O ubuntu22.sh || error_exit "Failed to download Ubuntu setup script"
-chmod +x ubuntu22.sh
-bash ubuntu22.sh || error_exit "Failed to run Ubuntu setup script"
-
-# Start Ubuntu environment
-info_message "Starting Ubuntu environment..."
-./start-ubuntu22.sh || error_exit "Failed to start Ubuntu environment"
-
 # Setup ROS 2 Humble
 info_message "Setting up ROS 2 Humble..."
 
