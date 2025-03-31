@@ -52,8 +52,7 @@ apt install net-tools -y || error_exit "Failed to install net-tools"
 # Download and setup Ubuntu 22.04
 info_message "Downloading Ubuntu 22.04 setup script..."
 wget https://raw.githubusercontent.com/AndronixApp/AndronixOrigin/master/Installer/Ubuntu22/ubuntu22.sh -O ubuntu22.sh || error_exit "Failed to download Ubuntu setup script"
-chmod +x ubuntu22.sh
-bash ubuntu22.sh || error_exit "Failed to run Ubuntu setup script"
+chmod +x ubuntu22.sh || error_exit "Failed to run Ubuntu setup script"
 
 # Start Ubuntu environment
 info_message "To start the Ubuntu environment, run './start-ubuntu22.sh' in your terminal."

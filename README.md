@@ -25,9 +25,7 @@ This repository contains scripts to install and run ROS 2 Humble on Android devi
 #### Step 1: Setup Ubuntu (in Termux)
 ```bash
 # Update Termux and get required packages
-pkg update -y
-pkg upgrade -y
-pkg install wget -y
+pkg update -y && pkg upgrade -y && pkg install wget -y
 
 # Download and run Ubuntu setup script
 wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ubuntu.sh
@@ -42,6 +40,7 @@ chmod +x setup_ubuntu.sh
 After Ubuntu is installed and you're in the Ubuntu environment:
 ```bash
 # Download and run ROS 2 setup script
+apt update -y && apt upgrade -y && apt install wget -y
 wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ros2.sh
 chmod +x setup_ros2.sh
 ./setup_ros2.sh

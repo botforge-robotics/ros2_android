@@ -27,10 +27,6 @@ info_message() {
     echo -e "${YELLOW}$1${NC}"
 }
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then 
-    error_exit "Please do not run as root"
-fi
 
 # Setup ROS 2 Humble
 info_message "Setting up ROS 2 Humble..."
