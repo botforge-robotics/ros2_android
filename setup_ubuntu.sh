@@ -45,9 +45,13 @@ info_message "Installing required packages..."
 pkg update -y || error_exit "Failed to update pkg"
 pkg install wget curl proot tar -y || error_exit "Failed to install required packages"
 
+#install openssh
+info_message "Installing openssh..."
+pkg install openssh -y || error_exit "Failed to install openssh"
+passwd || error_exit "Failed to set password"
 # Install net-tools
 info_message "Installing net-tools..."
-apt install net-tools -y || error_exit "Failed to install net-tools"
+pkg install net-tools -y || error_exit "Failed to install net-tools"
 
 # Download and setup Ubuntu 22.04
 info_message "Downloading Ubuntu 22.04 setup script..."

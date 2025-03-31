@@ -33,7 +33,7 @@ info_message "Setting up ROS 2 Humble..."
 
 # Configure locale
 locale  # check for UTF-8
-apt update && sudo apt install locales -y || error_exit "Failed to install locales"
+apt update && apt install locales -y || error_exit "Failed to install locales"
 locale-gen en_US en_US.UTF-8 || error_exit "Failed to generate locale"
 update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 || error_exit "Failed to update locale"
 export LANG=en_US.UTF-8
@@ -68,6 +68,10 @@ apt install ros-humble-ros-base -y || error_exit "Failed to install ROS 2 Humble
 info_message "Installing development tools..."
 apt install ros-dev-tools -y || error_exit "Failed to install development tools"
 
+rosdep init || error_exit "Failed to initialize rosdep"
+rosdep fix-permissions || error_exit "Failed to fix rosdep permissions"
+rosdep update || error_exit "Failed to update rosdep"
+
 # Setup RIO ROS2 Repository
 info_message "Setting up RIO ROS2 Repository..."
 
@@ -101,14 +105,20 @@ git clone https://github.com/botforge-robotics/rio_ros2.git || error_exit "Faile
 
 #install dependencies
 info_message "Installing dependencies..."
+apt-get install python3-pip -y || error_exit "Failed to install python3-pip"
 pip install opencv-python aiortc aiohttp_cors ollama aiohttp || error_exit "Failed to install dependencies"
+
+info_message "Installing ollama..."
 curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"
-ollama pull gemma2:2b || error_exit "Failed to pull gemma2:2b model"
+ollama serve &
+info_message "Pulling gemma3:1b model..."
+ollama pull gemma3:1b || error_exit "Failed to pull gemma3:1b model"
 
 # Build RIO packages
-info_message "Building RIO packages..."
+info_message "Installing RIO dependencies..."
 cd ~/rio_ws || error_exit "Failed to change to RIO workspace"
-rosdep install --from-paths src --ignore-src -r -y || error_exit "Failed to install RIO dependencies"
+rosdep install --from-paths src --ignore-src -r -y
+info_message "Building RIO packages..."
 colcon build || error_exit "Failed to build RIO packages"
 source install/setup.bash || error_exit "Failed to source RIO setup"
 
