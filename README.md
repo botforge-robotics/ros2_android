@@ -305,19 +305,7 @@ If you encounter any issues:
 
 5. 📝 Check the error messages in the script output
 
-
-6. **ROS2Sense App Connection Issues** 📱
-   If you're using the ROS2Sense mobile app:
-   - Ensure both devices (phone and computer) are on the same WiFi network
-   - Verify the ROS_DOMAIN_ID matches between devices
-   - Check if the correct ROS_IP/ROS_HOSTNAME is set
-   - Try restarting the ROS2 daemon:
-     ```bash
-     ros2 daemon stop
-     ros2 daemon start
-     ```
-
-7. **Permission Issues** 🔒
+6. **Permission Issues** 🔒
    If you encounter permission errors:
    ```bash
    chmod +x setup_ubuntu.sh
