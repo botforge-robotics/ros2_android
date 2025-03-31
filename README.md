@@ -20,34 +20,67 @@ This repository contains scripts to install and run ROS 2 Humble on Android devi
 2. Install the downloaded APK on your device
 3. Open Termux app and grant necessary permissions
 
-### 2. Install ROS 2 and RIO
+### 2. Installation Process (Two-Step)
 
-1. Open Termux and run:
+#### Step 1: Setup Ubuntu (in Termux)
 ```bash
+# Update Termux and get required packages
 pkg update -y
 pkg upgrade -y
 pkg install wget -y
-wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/install.sh
-chmod +x install.sh
-./install.sh
+
+# Download and run Ubuntu setup script
+wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ubuntu.sh
+chmod +x setup_ubuntu.sh
+./setup_ubuntu.sh
+```
+#### Step 2: Start Ubuntu (in Termux)
+```bash
+./start-ubuntu22.sh
+```
+#### Step 3: Install ROS 2 and RIO (in Ubuntu)
+After Ubuntu is installed and you're in the Ubuntu environment:
+```bash
+# Download and run ROS 2 setup script
+wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ros2.sh
+chmod +x setup_ros2.sh
+./setup_ros2.sh
 ```
 
-The script will:
-- Install Ubuntu 22.04 using Andronix
-- Set up ROS 2 Humble
-- Install Micro-ROS
-- Set up RIO ROS2 packages
-- Configure all necessary environments
+The installation process will:
+1. First script (`setup_ubuntu.sh`):
+   - Install required Termux packages
+   - Download and setup Ubuntu 22.04
+   - Configure basic Ubuntu environment
 
+2. Second script (`setup_ros2.sh`):
+   - Install ROS 2 Humble
+   - Setup Micro-ROS
+   - Install RIO ROS2 packages
+   - Configure all environments
+
+## Post-Installation
+
+After successful installation:
+1. Restart your terminal
+2. Your ROS 2 environment will be automatically sourced
+3. Run `ros2 --help` to verify the installation
 
 ## Troubleshooting
-
 If you encounter any issues:
 
-1. Make sure you have enough storage space
-2. Check your internet connection
-3. Try running the installation script again
-4. Check the error messages in the script output
+1. termux no mirror or mirror group selected
+```bash
+termux-change-repo
+```
+2. Make sure you have enough storage space
+3. Check your internet connection
+4. If the first script fails:
+   - Try running `setup_ubuntu.sh` again
+5. If the second script fails:
+   - Make sure you're in the Ubuntu environment
+   - Try running `setup_ros2.sh` again
+6. Check the error messages in the script output
 
 ## Notes
 

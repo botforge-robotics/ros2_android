@@ -56,5 +56,4 @@ chmod +x ubuntu22.sh
 bash ubuntu22.sh || error_exit "Failed to run Ubuntu setup script"
 
 # Start Ubuntu environment
-info_message "Starting Ubuntu environment..."
-./start-ubuntu22.sh || error_exit "Failed to start Ubuntu environment"
+info_message "To start the Ubuntu environment, run './start-ubuntu22.sh' in your terminal."

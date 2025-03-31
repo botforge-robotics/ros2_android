@@ -127,3 +127,4 @@ echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc || error_exit "Failed
 echo "source ~/uros_ws/install/setup.bash" >> ~/.bashrc || error_exit "Failed to add Micro-ROS source to .bashrc"
 echo "source ~/rio_ws/install/setup.bash" >> ~/.bashrc || error_exit "Failed to add RIO source to .bashrc"
 
+info_message "Installation complete! You can now start the ROS 2"
