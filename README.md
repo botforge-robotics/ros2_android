@@ -44,7 +44,7 @@
 
 Update Termux and get required packages
 ```bash
-pkg update -y && pkg upgrade -y && pkg install wget -y
+termux-change-repo -y && pkg update -y && pkg upgrade -y && pkg install wget -y
 ```
 Download and run Ubuntu setup script
 ```bash

@@ -35,8 +35,8 @@ fi
 echo -e "${GREEN}Starting installation of Ubuntu 22.04 and ROS 2 Humble on Termux...${NC}"
 
 # Install neofetch and show system info
-info_message "Installing neofetch and updating system..."
-termux-change-repo -y && apt update -y && apt upgrade -y && pkg install neofetch -y || error_exit "Failed to update system"
+info_message "Installing neofetch.."
+pkg install neofetch -y || error_exit "Failed to update system"
 neofetch
 
 # Install required packages
