@@ -42,14 +42,13 @@
 <details>
 <summary><b>Step 1: Setup Ubuntu (in Termux)</b></summary>
 
+Update Termux and get required packages
 ```bash
-# Update Termux and get required packages
 pkg update -y && pkg upgrade -y && pkg install wget -y
-
-# Download and run Ubuntu setup script
-wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ubuntu.sh
-chmod +x setup_ubuntu.sh
-./setup_ubuntu.sh
+```
+Download and run Ubuntu setup script
+```bash
+wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ubuntu.sh && chmod +x setup_ubuntu.sh && ./setup_ubuntu.sh
 ```
 </details>
 
@@ -57,16 +56,17 @@ chmod +x setup_ubuntu.sh
 <summary><b>Step 2: Install ROS 2 and RIO (in Ubuntu)</b></summary>
 
 After Ubuntu is installed:
-1. Start Ubuntu environment:
+1. Start Ubuntu environment in Termux(if not already started):
 ```bash
 ./start-ubuntu22.sh
 ```
-
-2. In the Ubuntu environment, run:
+2. Update and install required packages
 ```bash
-wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ros2.sh
-chmod +x setup_ros2.sh
-sudo ./setup_ros2.sh
+apt update && apt upgrade -y && apt install wget -y
+```
+3. Download and run ROS 2 setup script
+```bash
+wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ros2.sh && chmod +x setup_ros2.sh && ./setup_ros2.sh
 ```
 </details>
 
