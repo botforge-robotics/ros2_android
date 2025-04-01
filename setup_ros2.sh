@@ -121,11 +121,6 @@ sleep 10
 info_message "Pulling gemma3:1b model..."
 ollama pull gemma3:1b || error_exit "Failed to pull gemma3:1b model"
 
-# Verify ollama is running
-if ! pgrep -x "ollama" > /dev/null; then
-    error_exit "Ollama server failed to start"
-fi
-
 # Build RIO packages
 info_message "Installing RIO dependencies..."
 cd ~/rio_ws || error_exit "Failed to change to RIO workspace"
