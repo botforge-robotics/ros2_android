@@ -110,9 +110,21 @@ pip install opencv-python aiortc aiohttp_cors ollama aiohttp || error_exit "Fail
 
 info_message "Installing ollama..."
 curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"
-ollama serve &
+
+info_message "Starting ollama server..."
+nohup ollama serve >/dev/null 2>&1 &
+
+# Wait for ollama server to start (10 seconds)
+info_message "Waiting for ollama server to initialize..."
+sleep 10
+
 info_message "Pulling gemma3:1b model..."
 ollama pull gemma3:1b || error_exit "Failed to pull gemma3:1b model"
+
+# Verify ollama is running
+if ! pgrep -x "ollama" > /dev/null; then
+    error_exit "Ollama server failed to start"
+fi
 
 # Build RIO packages
 info_message "Installing RIO dependencies..."
