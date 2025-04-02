@@ -20,20 +20,25 @@ int parse_ifconfig(struct ifaddrs **ifap)
         return -1;
     }
 
-    struct ifaddrs *wlan_head = NULL, *wlan_prev = NULL;  // For wlan interfaces
-    struct ifaddrs *other_head = NULL, *other_prev = NULL;  // For other interfaces
+    struct ifaddrs *wlan_head = NULL, *wlan_prev = NULL;
+    struct ifaddrs *other_head = NULL, *other_prev = NULL;
     char line[256], iface_name[32], inet_addr[32];
+    struct ifaddrs *current_iface = NULL;  // Track current interface being processed
+    int is_wlan = 0;  // Flag to track if current interface is wlan
 
     while (fgets(line, sizeof(line), fp))
     {
+        // New interface section starts
         if (sscanf(line, "%31[^:]:", iface_name) == 1 && strstr(line, "flags"))
         {
             struct ifaddrs *iface = calloc(1, sizeof(struct ifaddrs));
             iface->ifa_name = strdup(iface_name);
             iface->ifa_flags = IFF_UP | IFF_RUNNING;
 
-            // Check if interface name starts with "wlan"
-            if (strncmp(iface_name, "wlan", 4) == 0)
+            is_wlan = (strncmp(iface_name, "wlan", 4) == 0);
+            current_iface = iface;
+
+            if (is_wlan)
             {
                 if (wlan_prev)
                     wlan_prev->ifa_next = iface;
@@ -50,15 +55,15 @@ int parse_ifconfig(struct ifaddrs **ifap)
                 other_prev = iface;
             }
         }
-        else if (strstr(line, "inet "))
+        // Parse inet address for current interface
+        else if (current_iface && strstr(line, "inet "))
         {
-            struct ifaddrs *curr_prev = strncmp(line, "wlan", 4) == 0 ? wlan_prev : other_prev;
-            if (curr_prev && sscanf(line, " inet %31s", inet_addr) == 1)
+            if (sscanf(line, " inet %31s", inet_addr) == 1)
             {
                 struct sockaddr_in *addr = calloc(1, sizeof(struct sockaddr_in));
                 addr->sin_family = AF_INET;
                 inet_pton(AF_INET, inet_addr, &addr->sin_addr);
-                curr_prev->ifa_addr = (struct sockaddr *)addr;
+                current_iface->ifa_addr = (struct sockaddr *)addr;
             }
         }
     }
@@ -68,8 +73,8 @@ int parse_ifconfig(struct ifaddrs **ifap)
     // Connect wlan interfaces to other interfaces
     if (wlan_prev)
         wlan_prev->ifa_next = other_head;
-    
-    // If we have wlan interfaces, they become the head
+
+    // Return wlan_head if exists, otherwise other_head
     *ifap = wlan_head ? wlan_head : other_head;
 
     return 0;

@@ -45,7 +45,7 @@ pkg update -y || error_exit "Failed to update pkg"
 pkg install wget curl proot tar termux-api -y || error_exit "Failed to install required packages"
 
 #install build-essential nano
-pkg install build-essential nano -y || error_exit "Failed to install build-essential"
+pkg install build-essential nano clang -y || error_exit "Failed to install build-essential"
 
 #install openssh
 info_message "Installing openssh..."
