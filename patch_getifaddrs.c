@@ -13,7 +13,6 @@
 // Function to run ifconfig and parse output
 int parse_ifconfig(struct ifaddrs **ifap)
 {
-    //printf("[DEBUG] Running parse_ifconfig()\n");
     FILE *fp = popen("ifconfig", "r");
     if (!fp)
     {
@@ -21,65 +20,76 @@ int parse_ifconfig(struct ifaddrs **ifap)
         return -1;
     }
 
-    struct ifaddrs *head = NULL, *prev = NULL;
+    struct ifaddrs *wlan_head = NULL, *wlan_prev = NULL;  // For wlan interfaces
+    struct ifaddrs *other_head = NULL, *other_prev = NULL;  // For other interfaces
     char line[256], iface_name[32], inet_addr[32];
 
     while (fgets(line, sizeof(line), fp))
     {
-        //printf("[DEBUG] Read line: %s", line);
-
         if (sscanf(line, "%31[^:]:", iface_name) == 1 && strstr(line, "flags"))
-        { // Parse interface name
-            //printf("[DEBUG] Detected interface: %s\n", iface_name);
+        {
             struct ifaddrs *iface = calloc(1, sizeof(struct ifaddrs));
             iface->ifa_name = strdup(iface_name);
             iface->ifa_flags = IFF_UP | IFF_RUNNING;
 
-            if (prev)
-                prev->ifa_next = iface;
-            else
-                head = iface;
-            prev = iface;
-        }
-        else if (strstr(line, "inet ") && prev)
-        { // Parse IPv4 address
-            if (sscanf(line, " inet %31s", inet_addr) == 1)
+            // Check if interface name starts with "wlan"
+            if (strncmp(iface_name, "wlan", 4) == 0)
             {
-                //printf("[DEBUG] Found IPv4 address: %s for interface %s\n", inet_addr, prev->ifa_name);
+                if (wlan_prev)
+                    wlan_prev->ifa_next = iface;
+                else
+                    wlan_head = iface;
+                wlan_prev = iface;
+            }
+            else
+            {
+                if (other_prev)
+                    other_prev->ifa_next = iface;
+                else
+                    other_head = iface;
+                other_prev = iface;
+            }
+        }
+        else if (strstr(line, "inet "))
+        {
+            struct ifaddrs *curr_prev = strncmp(line, "wlan", 4) == 0 ? wlan_prev : other_prev;
+            if (curr_prev && sscanf(line, " inet %31s", inet_addr) == 1)
+            {
                 struct sockaddr_in *addr = calloc(1, sizeof(struct sockaddr_in));
                 addr->sin_family = AF_INET;
                 inet_pton(AF_INET, inet_addr, &addr->sin_addr);
-                prev->ifa_addr = (struct sockaddr *)addr;
+                curr_prev->ifa_addr = (struct sockaddr *)addr;
             }
         }
     }
 
-    pclose(fp); // Close file pointer
+    pclose(fp);
 
-    *ifap = head;
-    //printf("[DEBUG] parse_ifconfig() completed successfully\n");
+    // Connect wlan interfaces to other interfaces
+    if (wlan_prev)
+        wlan_prev->ifa_next = other_head;
+    
+    // If we have wlan interfaces, they become the head
+    *ifap = wlan_head ? wlan_head : other_head;
+
     return 0;
 }
 
 // Overriding getifaddrs()
 int getifaddrs(struct ifaddrs **ifap)
 {
-    //printf("[DEBUG] getifaddrs() called\n");
     return parse_ifconfig(ifap);
 }
 
-// Free allocated memory (needed for compatibility)
+// Free allocated memory
 void freeifaddrs(struct ifaddrs *ifa)
 {
-    //printf("[DEBUG] freeifaddrs() called\n");
     while (ifa)
     {
         struct ifaddrs *next = ifa->ifa_next;
-        //printf("[DEBUG] Freeing interface: %s\n", ifa->ifa_name);
         free(ifa->ifa_addr);
         free(ifa->ifa_name);
         free(ifa);
         ifa = next;
     }
-    //printf("[DEBUG] freeifaddrs() completed\n");
 }
