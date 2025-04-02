@@ -38,6 +38,9 @@ locale-gen en_US en_US.UTF-8 || error_exit "Failed to generate locale"
 update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 || error_exit "Failed to update locale"
 export LANG=en_US.UTF-8
 
+#install build-essential nano
+apt install build-essential nano -y || error_exit "Failed to install build-essential"
+
 #install net tools
 apt install net-tools -y || error_exit "Failed to install net-tools"
 # Verify locale settings

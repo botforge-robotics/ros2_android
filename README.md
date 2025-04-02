@@ -242,20 +242,24 @@ To enable communication between your mobile device (running ROS 2 in Termux/Ubun
 
 To remotely access your Termux environment via SSH from another device (like your computer), follow these steps:
 
-1. **Get your Termux username** 👤
+1. **Activate SSH in Termux** 
+   ```bash
+   sshd
+   ```
+2. **Get your Termux username** 👤
    ```bash
    whoami
    ```
    This will display your Termux username that you'll need for SSH login.
 
-2. **Find your device's IP address** 📍
+3. **Find your device's IP address** 📍
    ```bash
    ifconfig
    ```
    Look for the `wlan0` section and find the `inet` address - this is your device's IP address on the WiFi network.
    For example: `inet 192.168.1.100`
 
-3. **Connect via SSH from another device** 🔌
+4. **Connect via SSH from another device** 🔌
    ```bash
    ssh <username>@<ip_address> -p 8022
    ```
@@ -263,15 +267,15 @@ To remotely access your Termux environment via SSH from another device (like you
    
    > **Note:** Port 8022 is Termux's default SSH port, different from the standard port 22.
 
-4. **Enter your password** 🔐
+5. **Enter your password** 🔐
    - You'll be prompted for the password you set during the Ubuntu installation
    - Type your password (it won't be visible as you type)
    - Press Enter to submit
 
-5. **Success!** ✨
+6. **Success!** ✨
    You should now see the Termux prompt, indicating a successful SSH connection.
 
-6. **Start Ubuntu** 🚀
+7. **Start Ubuntu** 🚀
    ```bash
    ./start-ubuntu22.sh
    ```
@@ -289,11 +293,20 @@ To remotely access your Termux environment via SSH from another device (like you
 
 If you encounter any issues:
 
-1. **Mirror Selection Issue** 🔄
+1. **getifaddrs error** 🔄
    ```bash
-   termux-change-repo
+   wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/patch_getifaddrs.c
+   gcc -shared -fPIC -o patch_getifaddrs.so patch_getifaddrs.c -ldl
+   export LD_PRELOAD=$PWD/patch_getifaddrs.so
+   echo "export LD_PRELOAD=$(pwd)/patch_getifaddrs.so" >> ~/.bashrc
    ```
-
+   test getifaddrs
+   ```bash
+   wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/test_getifaddrs.c
+   gcc -o test_getifaddrs test_getifaddrs.c
+   ./test_getifaddrs
+   ```
+     
 2. 🌐 Check your internet connection
 
 3. 🔄 If the first script fails:
