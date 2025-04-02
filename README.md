@@ -298,7 +298,7 @@ If you encounter any issues:
    wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/patch_getifaddrs.c
    gcc -shared -fPIC -o patch_getifaddrs.so patch_getifaddrs.c -ldl
    export LD_PRELOAD=$PWD/patch_getifaddrs.so
-   echo "export LD_PRELOAD=$(pwd)/patch_getifaddrs.so" >> ~/.bashrc
+   echo "export LD_PRELOAD=$pwd/patch_getifaddrs.so" >> ~/.bashrc
    ```
    test getifaddrs
    ```bash

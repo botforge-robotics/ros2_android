@@ -33,7 +33,7 @@ int parse_ifconfig(struct ifaddrs **ifap)
         {
             struct ifaddrs *iface = calloc(1, sizeof(struct ifaddrs));
             iface->ifa_name = strdup(iface_name);
-            iface->ifa_flags = IFF_UP | IFF_RUNNING;
+            iface->ifa_flags = IFF_UP | IFF_RUNNING | IFF_BROADCAST | IFF_MULTICAST;
 
             is_wlan = (strncmp(iface_name, "wlan", 4) == 0);
             current_iface = iface;
