@@ -7,7 +7,7 @@
 # 🤖 ROS 2 Humble on Android (Termux)
 
 
-*Run ROS 2 Humble, Micro-ROS, Ollama and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
+*Run ROS 2 Humble, Micro-ROS and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
 </div>
 
 ---
@@ -76,8 +76,9 @@ The installation process will:
 - 🤖 Install Micro-ROS
 - 🚀 Set up RIO ROS2 packages
 - ⚙️ Configure all environments
+> 🔒 **Note(CycloneDDS):** By default `ros2_setup.sh` installs and configures CycloneDDS (rmw_cyclonedds_cpp) as the ROS 2 middleware for better performance, as it is lightweight and efficient for mobile.
 
-
+> 🔒 **Note(Domain ID):** For remote communication, ROS_DOMAIN_ID is set to 156 by default in `ros2_setup.sh`.You can change it to any number between 0-232 in `ros2_setup.sh` line 144 and restart termux.
 
 ## 📝 Post-Installation
 
@@ -110,25 +111,18 @@ ROS2Sense transforms your smartphone into a powerful ROS 2 sensor hub, providing
 ### Download ROS2Sense from [Google Play Store](https://play.google.com/store/apps/details?id=com.botforge.rio)
 <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 25px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
     <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/connectionScreen.jpeg" alt="Connection Interface" style=" border-radius: 10px; max-width: 100%;">
-    </div>
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
         <img src="./images/listening.jpg" alt="Listening Mode" style=" border-radius: 10px; max-width: 100%;">
     </div>
     <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
         <img src="./images/speaking.jpg" alt="Speaking Mode" style=" border-radius: 10px; max-width: 100%;">
     </div>
     <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/settings1.jpg" alt="Settings Page 1" style="border-radius: 10px;max-width: 100%;">
-    </div>
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/settings2.jpg" alt="Settings Page 2" style="border-radius: 10px; max-width: 100%;">
-    </div>
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
         <img src="./images/settings3.jpg" alt="Settings Page 3" style=" border-radius: 10px;  max-width: 100%;">
     </div>
 </div>
+
 ---
+
 ## 🚀 Usage
 
 
@@ -156,6 +150,7 @@ This launch file includes:
 - **Ollama NLP Node**: Natural language processing for robot interactions
 - **WebRTC Node**: Video streaming server (port 8080)
 - **Rosbridge WebSocket**: Enables ROS2-to-WebSocket communication
+> 📝 **Note:** If you encounter issues [getifaddrs(): permission denied](#getifaddrs-permission-denied)  refer to troubleshooting section for more details.
 
 #### 2.2 PCB Nodes Launch
 The PCB nodes launch file (`pcb_nodes.launch.py`) manages hardware-related components:
@@ -198,13 +193,14 @@ ros2 launch rio_bringup rio_real_robot.launch.py \
 #### 4. On Desktop PC with ROS2 Humble installed 💻
 
 ```bash
-# Set in Ubuntu terminal
-export ROS_DOMAIN_ID=0  # Choose any number between 0-232
-export ROS_LOCALHOST_ONLY=0  # Enable non-localhost communication
+export ROS_DOMAIN_ID=156 
+export ROS_LOCALHOST_ONLY=0
 ```
+Note: ROS_DOMAIN_ID is set to 156 by default in `setup_ros2.sh` in termux.you can change it to any number between 0-232 in `setup_ros2.sh` line 144.
+
 or export to .bashrc for permanent use
 ```bash
-echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
+echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc
 echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
 ```
 
@@ -221,19 +217,19 @@ ros2 topic list
 
 To enable communication between your mobile device (running ROS 2 in Termux/Ubuntu) and a remote PC running ROS 2:
 
-1. **On your mobile device (Termux/Ubuntu)** 📱
+1. **On your remote PC** 💻
    ```bash
-   export ROS_DOMAIN_ID=0  # Choose any number between 0-232
-   export ROS_LOCALHOST_ONLY=0  # Enable non-localhost communication
-   ```
-
-2. **On your remote PC** 💻
-   ```bash
-   export ROS_DOMAIN_ID=0  # Use the same number as mobile device
+   export ROS_DOMAIN_ID=156 
    export ROS_LOCALHOST_ONLY=0
    ```
+ 
+   or export to .bashrc for permanent use
+   ```bash
+   echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc
+   echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
+   ```
 
-> 🔒 **Note:** For security, use unique domain IDs when multiple ROS 2 systems are on the same network to prevent unintended cross-communication.
+> 🔒 **Note:** ROS_DOMAIN_ID is set to 156 by default in `termux`.You can change it to any number between 0-232 in `setup_ros2.sh` line 144 and restart termux.
 
 
 ---
@@ -263,7 +259,7 @@ To remotely access your Termux environment via SSH from another device (like you
    ```bash
    ssh <username>@<ip_address> -p 8022
    ```
-   Example: `ssh u0_a123@192.168.1.100 -p 8022`
+   Example: `ssh u0_a572@192.168.1.100 -p 8022`
    
    > **Note:** Port 8022 is Termux's default SSH port, different from the standard port 22.
 
@@ -293,20 +289,48 @@ To remotely access your Termux environment via SSH from another device (like you
 
 If you encounter any issues:
 
-1. **getifaddrs error** 🔄
+1. **getifaddrs(): permission denied** 🔄
+   we have developed a patch to fix the getifaddrs error.
+   Download the patch:
    ```bash
    wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/patch_getifaddrs.c
-   gcc -shared -fPIC -o patch_getifaddrs.so patch_getifaddrs.c -ldl
-   export LD_PRELOAD=$PWD/patch_getifaddrs.so
-   echo "export LD_PRELOAD=$pwd/patch_getifaddrs.so" >> ~/.bashrc
    ```
-   test getifaddrs
+   
+   Compile the patch:
+   ```bash
+   gcc -shared -fPIC -o patch_getifaddrs.so patch_getifaddrs.c -ldl
+   ```
+   
+   Apply the patch temporarily:
+   ```bash
+   export LD_PRELOAD=$PWD/patch_getifaddrs.so
+   ```
+   
+   Or apply permanently by adding to .bashrc:
+   ```bash
+   echo "export LD_PRELOAD=$PWD/patch_getifaddrs.so" >> ~/.bashrc
+   ```
+   
+   Test the patch:
    ```bash
    wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/test_getifaddrs.c
+   ```
+   ```bash
    gcc -o test_getifaddrs test_getifaddrs.c
+   ```
+   ```bash
    ./test_getifaddrs
    ```
-     
+   Output:
+   ```bash
+   Network interfaces detected:
+   Interface: wlan0
+      IPv4 Address: 192.168.0.195
+   Interface: lo
+      IPv4 Address: 127.0.0.1
+   Interface: rmnet_data3
+      IPv4 Address: 100.65.187.41
+   ```
 2. 🌐 Check your internet connection
 
 3. 🔄 If the first script fails:

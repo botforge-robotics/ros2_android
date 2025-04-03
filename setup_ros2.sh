@@ -109,20 +109,20 @@ git clone https://github.com/botforge-robotics/rio_ros2.git || error_exit "Faile
 #install dependencies
 info_message "Installing dependencies..."
 apt-get install python3-pip -y || error_exit "Failed to install python3-pip"
-pip install opencv-python aiortc aiohttp_cors ollama aiohttp || error_exit "Failed to install dependencies"
+pip install opencv-python aiortc aiohttp_cors aiohttp || error_exit "Failed to install dependencies"
 
-info_message "Installing ollama..."
-curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"
+# info_message "Installing ollama..."
+# curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"
 
-info_message "Starting ollama server..."
-nohup ollama serve >/dev/null 2>&1 &
+# info_message "Starting ollama server..."
+# nohup ollama serve >/dev/null 2>&1 &
 
-# Wait for ollama server to start (10 seconds)
-info_message "Waiting for ollama server to initialize..."
-sleep 10
+# # Wait for ollama server to start (10 seconds)
+# info_message "Waiting for ollama server to initialize..."
+# sleep 10
 
-info_message "Pulling gemma3:1b model..."
-ollama pull gemma3:1b || error_exit "Failed to pull gemma3:1b model"
+# info_message "Pulling gemma3:1b model..."
+# ollama pull gemma3:1b || error_exit "Failed to pull gemma3:1b model"
 
 # Build RIO packages
 info_message "Installing RIO dependencies..."
@@ -132,15 +132,25 @@ info_message "Building RIO packages..."
 colcon build || error_exit "Failed to build RIO packages"
 source install/setup.bash || error_exit "Failed to source RIO setup"
 
+#update and install rmw cyclonedds
+info_message "Updating and installing rmw cyclonedds..."
+apt update && apt install ros-humble-rmw-cyclonedds-cpp -y || error_exit "Failed to install rmw cyclonedds"
+
 # Source all environments
 source /opt/ros/$ROS_DISTRO/setup.bash || error_exit "Failed to source ROS 2 environment"
 source ~/uros_ws/install/setup.bash || error_exit "Failed to source Micro-ROS environment"
 source ~/rio_ws/install/setup.bash || error_exit "Failed to source RIO environment"
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_DOMAIN_ID=156
+export ROS_LOCALHOST_ONLY=0
 
 # Add environment sources to .bashrc
 info_message "Adding environment sources to .bashrc..."
 echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc || error_exit "Failed to add ROS 2 source to .bashrc"
 echo "source ~/uros_ws/install/setup.bash" >> ~/.bashrc || error_exit "Failed to add Micro-ROS source to .bashrc"
 echo "source ~/rio_ws/install/setup.bash" >> ~/.bashrc || error_exit "Failed to add RIO source to .bashrc"
+echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc || error_exit "Failed to add RMW_IMPLEMENTATION to .bashrc"
+echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc || error_exit "Failed to add ROS_DOMAIN_ID to .bashrc"
+echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc || error_exit "Failed to add ROS_LOCALHOST_ONLY to .bashrc"
 
-info_message "Installation complete! You can now start the ROS 2"
+info_message "Installation complete! You can now start the ROS 2 Humble environment with CycloneDDS as the middleware and domain ID 156."
