@@ -206,7 +206,8 @@ This launch file includes:
 # Launch real robot nodes
 ros2 launch rio_bringup rio_real_robot.launch.py \
   use_sim_time:=false \
-  agent_port:=8888
+  agent_port:=8888 \
+  llm_backend:=groq
 ```
 
 **Real Robot Parameters**:
@@ -214,6 +215,7 @@ ros2 launch rio_bringup rio_real_robot.launch.py \
 |-----------|-------------|---------------|---------|
 | `use_sim_time` | Use simulation clock (must be false for real hardware) | `false` | `true`/`false` |
 | `agent_port` | Micro-ROS agent UDP port | `8888` | Any available port number |
+| `llm_backend` | LLM backend | `ollama` | `ollama`, `groq` |
 
 > 📝 **Note:** Make sure to set up the domain and network configuration before launching any nodes to ensure proper communication between components.
 
