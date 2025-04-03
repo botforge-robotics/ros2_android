@@ -109,7 +109,7 @@ git clone https://github.com/botforge-robotics/rio_ros2.git || error_exit "Faile
 #install dependencies
 info_message "Installing dependencies..."
 apt-get install python3-pip -y || error_exit "Failed to install python3-pip"
-pip install opencv-python aiortc aiohttp_cors aiohttp || error_exit "Failed to install dependencies"
+pip install opencv-python aiortc aiohttp_cors groq aiohttp || error_exit "Failed to install dependencies"
 
 # info_message "Installing ollama..."
 # curl -fsSL https://ollama.com/install.sh | sh || error_exit "Failed to install ollama"

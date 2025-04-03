@@ -7,7 +7,7 @@
 # 🤖 ROS 2 Humble on Android (Termux)
 
 
-*Run ROS 2 Humble, Micro-ROS and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
+*Run ROS 2 Humble, Micro-ROS ,Groq Cloud LLM and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
 </div>
 
 ---
@@ -76,9 +76,11 @@ The installation process will:
 - 🤖 Install Micro-ROS
 - 🚀 Set up RIO ROS2 packages
 - ⚙️ Configure all environments
-> 🔒 **Note(CycloneDDS):** By default `ros2_setup.sh` installs and configures CycloneDDS (rmw_cyclonedds_cpp) as the ROS 2 middleware for better performance, as it is lightweight and efficient for mobile.
+> 📝 **Note(CycloneDDS):** By default `ros2_setup.sh` installs and configures CycloneDDS (rmw_cyclonedds_cpp) as the ROS 2 middleware for better performance, as it is lightweight and efficient for mobile.
 
-> 🔒 **Note(Domain ID):** For remote communication, ROS_DOMAIN_ID is set to 156 by default in `ros2_setup.sh`.You can change it to any number between 0-232 in `ros2_setup.sh` line 144 and restart termux.
+> 📝 **Note(Domain ID):** For remote communication, ROS_DOMAIN_ID is set to 156 by default in `ros2_setup.sh`.You can change it to any number between 0-232 in `ros2_setup.sh` line 144 and restart termux.
+
+
 
 ## 📝 Post-Installation
 
@@ -121,38 +123,66 @@ ROS2Sense transforms your smartphone into a powerful ROS 2 sensor hub, providing
     </div>
 </div>
 
+### Groq API Setup for Voice Features
+
+To use voice interactive features in ROS2Sense Mobile App, you'll need a Groq API key:
+
+1. Create an account at [Groq API Console](https://console.groq.com/login)
+2. Get your API key
+3. Set the API key as an environment variable:
+   ```bash
+   export GROQ_API_KEY=<your_groq_api_key>
+   ```
+
+4. Permanently add the API key to the environment variable GROQ_API_KEY in the ~/.bashrc file
+   ```bash
+   echo "export GROQ_API_KEY=<your_groq_api_key>" >> ~/.bashrc
+   ```
+
 ---
 
 ## 🚀 Usage
 
+### Launch Options
 
-##### 1. On Mobile Device (Before launching any nodes) 📱
-```bash
-# Set in Ubuntu terminal
-export ROS_DOMAIN_ID=0  # Choose any number between 0-232
-export ROS_LOCALHOST_ONLY=0  # Enable non-localhost communication
-```
-or export to .bashrc for permanent use
-```bash
-echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
-echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
-```
+There are three ways to launch RIO nodes:
 
-##### 2.1 Mobile Nodes Launch
+1. **Mobile Nodes Launch**
+   - Launches smartphone-related functionality
+   - Includes LLM, WebRTC, and WebSocket nodes
+
+2. **PCB Nodes Launch** 
+   - Launches hardware-related components
+   - Includes Micro-ROS agent and sensor nodes
+
+3. **Real Robot Launch**
+   - Combines both mobile and PCB functionality
+   - Full robot system deployment
+
+#### 1.1 Mobile Nodes Launch
 The mobile nodes launch file (`mobile_nodes.launch.py`) starts components related to the smartphone functionality:
 
 ```bash
 # Launch mobile-related nodes
-ros2 launch rio_bringup mobile_nodes.launch.py
+ros2 launch rio_bringup mobile_nodes.launch.py llm_backend:=groq
 ```
 
 This launch file includes:
-- **Ollama NLP Node**: Natural language processing for robot interactions
+- **Ollama LLM Node**: Local LLM for robot voice interactions
+- **Groq LLM Node**: Cloud LLM for robot voice interactions
 - **WebRTC Node**: Video streaming server (port 8080)
 - **Rosbridge WebSocket**: Enables ROS2-to-WebSocket communication
+
+**Mobile Node Launch Parameters**:
+| Parameter | Description | Default Value | Options |
+|-----------|-------------|---------------|---------|
+| `llm_backend` | LLM backend | `ollama` | `ollama`, `groq` |
+
+> 📝 **Note:** Use `llm_backend:=groq` to use groq cloud LLM for voice interactions as ollama is resource intensive.
+
 > 📝 **Note:** If you encounter issues [getifaddrs(): permission denied](#getifaddrs-permission-denied)  refer to troubleshooting section for more details.
 
-#### 2.2 PCB Nodes Launch
+#### 1.2 PCB Nodes Launch
 The PCB nodes launch file (`pcb_nodes.launch.py`) manages hardware-related components:
 
 ```bash
@@ -170,7 +200,7 @@ This launch file includes:
 - **Odometry TF Broadcaster**: Publishes transform data
 - **LIDAR UDP Node**: Manages LIDAR sensor data
 
-##### 2.3 Real Robot (Mobile+PCB) Launch
+#### 1.3 Real Robot (Mobile+PCB) Launch
 
 ```bash
 # Launch real robot nodes
@@ -187,16 +217,16 @@ ros2 launch rio_bringup rio_real_robot.launch.py \
 
 > 📝 **Note:** Make sure to set up the domain and network configuration before launching any nodes to ensure proper communication between components.
 
-#### 3. In ROS2Sense App 📱
+#### 2. In ROS2Sense App 📱
 - Enter `0.0.0.0` as ROS2 Bridge IP on connecting screen (since ROS2 is running on same device) only if `mobile_nodes.launch.py` or `rio_real_robot.launch.py` is launched.
 
-#### 4. On Desktop PC with ROS2 Humble installed 💻
+#### 3. On Desktop PC with ROS2 Humble installed 💻
 
 ```bash
 export ROS_DOMAIN_ID=156 
 export ROS_LOCALHOST_ONLY=0
 ```
-Note: ROS_DOMAIN_ID is set to 156 by default in `setup_ros2.sh` in termux.you can change it to any number between 0-232 in `setup_ros2.sh` line 144.
+> 📝 **Note:** ROS_DOMAIN_ID is set to 156 by default in `setup_ros2.sh` in termux.you can change it to any number between 0-232 in `setup_ros2.sh` line 144.
 
 or export to .bashrc for permanent use
 ```bash
