@@ -109,6 +109,7 @@ ROS2Sense transforms your smartphone into a powerful ROS 2 sensor hub, providing
 - 🆔 Fingerprint/Face ID – Biometric security and authentication for robots
 - 📲 Display Output – Use your mobile screen for animated robotic expressions
 - Inbuilt Madgwick Filter for IMU data fusion, Hotword Detection.
+- Hot word detection "RIO"
 
 ### Download ROS2Sense from [Google Play Store](https://play.google.com/store/apps/details?id=com.botforge.rio)
 <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 25px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
