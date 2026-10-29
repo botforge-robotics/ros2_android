@@ -1,8 +1,34 @@
+<div align="center">
+
+[![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy_Jalisco-blue.svg)](https://docs.ros.org/en/jazzy/)
+[![Platform](https://img.shields.io/badge/platform-Ubuntu_24.04_Noble-orange.svg)](https://ubuntu.com/)
+[![Architecture](https://img.shields.io/badge/architecture-ARM64_aarch64-green.svg)](https://arm.com)
+[![Mode](https://img.shields.io/badge/mode-Headless_Server-brightgreen.svg)](#-key-features)
+[![Release](https://img.shields.io/badge/release-v1.0.0-brightgreen.svg)](https://github.com/botforge-robotics/ros2_android/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
+
 # 🤖 Rosdroid: Headless ROS 2 Android Platform
 
-Transform any standard Android smartphone into a high-performance, cost-effective robotics companion computer—acting as an all-in-one replacement for a Single Board Computer (Raspberry Pi 5) + sensor breakout boards + battery pack + display + LTE/Wi-Fi modem.
+*Transform any standard Android smartphone into a high-performance, cost-effective robotics companion computer—acting as an all-in-one replacement for a Single Board Computer (Raspberry Pi 5) + sensor breakout boards + battery pack + display + LTE/Wi-Fi modem.*
+</div>
 
-Rosdroid runs a complete **headless Ubuntu Server 24.04** environment powered by **PRoot** directly on Android, pre-provisioned with **ROS 2 Jazzy Jalisco**, **Cyclone DDS**, **Dropbear SSH**, and a native hardware sensor hub.
+---
+
+## 📱 App Live Screenshots
+
+<div align="center">
+
+| 🤖 Animated Cybernetic Robot Face | 📊 Real-Time Telemetry & Sensors |
+|:---:|:---:|
+| <img src="../docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="../docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
+| **High-visibility neon green expressive eyes** | **Battery BMS, active Wi-Fi IP & camera controls** |
+
+| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
+|:---:|:---:|
+| <img src="../docs/images/screenshot_ssh.png" width="340" alt="SSH Remote Server Card" /> | <img src="../docs/images/screenshot_console.png" width="340" alt="In-App Terminal Console" /> |
+| **Dropbear SSH (:2222) with 1-tap copy shortcuts** | **Embedded PRoot terminal with 1-tap preset chips** |
+
+</div>
 
 ---
 
@@ -104,24 +130,6 @@ This script automatically:
 ```bash
 ros2 topic list
 ```
-You will immediately see all active phone topics:
-```
-/battery
-/camera/back/image_raw/compressed
-/camera/front/image_raw/compressed
-/cmd_vel
-/expression
-/gps
-/illuminance
-/imu/data
-/parameter_events
-/rosout
-/speech_recognition/hotword_detected
-/speech_recognition/result
-/speech_recognition/status
-/tof
-/torch
-```
 
 ### 3. Read Live Telemetry
 ```bash
@@ -163,18 +171,6 @@ To connect motor drivers, sensors, or robot bases (ESP32, Teensy, STM32, Arduino
    ```bash
    ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
    ```
-
----
-
-## 🎭 Interactive App Screens
-
-- **Face Tab**: Displays animated expressive robot eyes with blinking, saccades, and mood state transitions. The eye colors are rendered in high-contrast neon green for high outdoor and indoor visibility.
-- **Dashboard Tab**:
-  - Real-time IP address and battery percentage.
-  - Sensor stream toggle switches (Battery, IMU, GPS, Cameras).
-  - Physical Torch LED switch.
-  - 1-tap copy buttons for Dropbear SSH credentials.
-- **Console Tab**: Embedded interactive PRoot terminal. Tap preset chips like `ros2 topic list`, `ros2 node list`, or type commands directly on your phone.
 
 ---
 

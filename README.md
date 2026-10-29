@@ -1,10 +1,12 @@
 <div align="center">
-<img src="https://img.shields.io/badge/ROS2-Jazzy-blue" alt="ROS2"/>
-<img src="https://img.shields.io/badge/platform-Ubuntu%2024.04%20(Noble)-orange" alt="Platform"/>
-<img src="https://img.shields.io/badge/architecture-ARM64%20(aarch64)-green" alt="Architecture"/>
-<img src="https://img.shields.io/badge/mode-Headless%20Server-brightgreen" alt="Headless"/>
-<img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
-<img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/>
+
+[![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy_Jalisco-blue.svg)](https://docs.ros.org/en/jazzy/)
+[![Platform](https://img.shields.io/badge/platform-Ubuntu_24.04_Noble-orange.svg)](https://ubuntu.com/)
+[![Architecture](https://img.shields.io/badge/architecture-ARM64_aarch64-green.svg)](https://arm.com)
+[![Mode](https://img.shields.io/badge/mode-Headless_Server-brightgreen.svg)](#-why-headless-server)
+[![Release](https://img.shields.io/badge/release-v1.0.0-brightgreen.svg)](https://github.com/botforge-robotics/ros2_android/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/botforge-robotics/ros2_android/actions/workflows/ci.yml/badge.svg)](https://github.com/botforge-robotics/ros2_android/actions/workflows/ci.yml)
 
 # 🤖 Rosdroid: Headless ROS 2 Android Robot Platform
 
@@ -19,6 +21,7 @@
 
 - [Overview](#-overview)
 - [What Rosdroid Replaces](#-what-rosdroid-replaces)
+- [App Live Screenshots](#-app-live-screenshots)
 - [Why Headless Server?](#-why-headless-server)
 - [Architecture & Interfaces](#-architecture--interfaces)
 - [Quick Start](#-quick-start)
@@ -67,6 +70,24 @@ By installing Rosdroid on an Android phone, you eliminate hundreds of dollars in
 | **Microphone Array & Speaker** *($25)* | **Stereo Microphones & Loudspeaker** | Speech-to-Text, Wake Word, TTS |
 | **Wi-Fi 6 & 4G/5G LTE Hat** *($60)* | **Built-in Wi-Fi & Cellular Modem** | Native ROS 2 Cyclone DDS over Wi-Fi |
 | **USB Serial Converter** *($10)* | **USB-C OTG Micro-ROS Bridge** | Relays ESP32/STM32 serial to UDP 8888 |
+
+---
+
+## 📱 App Live Screenshots
+
+<div align="center">
+
+| 🤖 Animated Cybernetic Robot Face | 📊 Real-Time Telemetry & Sensors |
+|:---:|:---:|
+| <img src="docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
+| **High-visibility neon green expressive eyes** | **Battery BMS, active Wi-Fi IP & camera controls** |
+
+| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
+|:---:|:---:|
+| <img src="docs/images/screenshot_ssh.png" width="340" alt="SSH Remote Server Card" /> | <img src="docs/images/screenshot_console.png" width="340" alt="In-App Terminal Console" /> |
+| **Dropbear SSH (:2222) with 1-tap copy shortcuts** | **Embedded PRoot terminal with 1-tap preset chips** |
+
+</div>
 
 ---
 
