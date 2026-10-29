@@ -1,0 +1,36 @@
+# Gradle files
+.gradle/
+build/
+*/build/
+app/build/
+*.apk
+*.aab
+
+# Local configuration
+local.properties
+.bundle/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.shelf/
+
+# VS Code
+.vscode/
+
+# Native builds (CMake / NDK)
+.cxx/
+.externalNativeBuild/
+cmake-build-*/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+*.tmp
+tmp/
+scratch/

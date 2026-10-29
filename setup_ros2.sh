@@ -28,8 +28,10 @@ info_message() {
 }
 
 
-# Setup ROS 2 Humble
-info_message "Setting up ROS 2 Humble..."
+export ROS_DISTRO=${ROS_DISTRO:-jazzy}
+
+# Setup ROS 2
+info_message "Setting up ROS 2 $ROS_DISTRO..."
 
 # Configure locale
 locale  # check for UTF-8
@@ -63,9 +65,9 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 info_message "Updating package lists..."
 apt update || error_exit "Failed to update package lists"
 
-# Install ROS 2 Humble  
-info_message "Installing ROS 2 Humble..."
-apt install ros-humble-ros-base -y || error_exit "Failed to install ROS 2 Humble"
+# Install ROS 2
+info_message "Installing ROS 2 $ROS_DISTRO..."
+apt install ros-$ROS_DISTRO-ros-base -y || error_exit "Failed to install ROS 2 $ROS_DISTRO"
 
 # Install development tools
 info_message "Installing development tools..."
@@ -79,7 +81,7 @@ rosdep update || error_exit "Failed to update rosdep"
 info_message "Setting up RIO ROS2 Repository..."
 
 # Source ROS 2 environment
-source /opt/ros/humble/setup.bash || error_exit "Failed to source ROS 2 environment"
+source /opt/ros/$ROS_DISTRO/setup.bash || error_exit "Failed to source ROS 2 environment"
 
 # Set up Micro-ROS workspace
 info_message "Setting up Micro-ROS workspace..."
@@ -134,7 +136,7 @@ source install/setup.bash || error_exit "Failed to source RIO setup"
 
 #update and install rmw cyclonedds
 info_message "Updating and installing rmw cyclonedds..."
-apt update && apt install ros-humble-rmw-cyclonedds-cpp -y || error_exit "Failed to install rmw cyclonedds"
+apt update && apt install ros-$ROS_DISTRO-rmw-cyclonedds-cpp -y || error_exit "Failed to install rmw cyclonedds"
 
 # Source all environments
 source /opt/ros/$ROS_DISTRO/setup.bash || error_exit "Failed to source ROS 2 environment"
@@ -153,4 +155,4 @@ echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc || error_exit "
 echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc || error_exit "Failed to add ROS_DOMAIN_ID to .bashrc"
 echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc || error_exit "Failed to add ROS_LOCALHOST_ONLY to .bashrc"
 
-info_message "Installation complete! You can now start the ROS 2 Humble environment with CycloneDDS as the middleware and domain ID 156."
+info_message "Installation complete! You can now start the ROS 2 $ROS_DISTRO environment with CycloneDDS as the middleware and domain ID 156."

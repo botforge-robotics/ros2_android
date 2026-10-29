@@ -1,404 +1,317 @@
 <div align="center">
-<img src="https://img.shields.io/badge/ROS2-Humble-blue" alt="ROS2"/>
+<img src="https://img.shields.io/badge/ROS2-Jazzy-blue" alt="ROS2"/>
+<img src="https://img.shields.io/badge/platform-Ubuntu%2024.04%20(Noble)-orange" alt="Platform"/>
+<img src="https://img.shields.io/badge/architecture-ARM64%20(aarch64)-green" alt="Architecture"/>
+<img src="https://img.shields.io/badge/mode-Headless%20Server-brightgreen" alt="Headless"/>
 <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
-<img src="https://img.shields.io/badge/platform-Ubuntu%2022.04-orange" alt="Platform"/>
+<img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"/>
 
+# 🤖 Rosdroid: Headless ROS 2 Android Robot Platform
 
-# 🤖 ROS 2 Humble on Android (Termux)
+*Transform any standard Android smartphone into a high-performance, power-efficient robotics companion computer running a headless Ubuntu 24.04 Server, ROS 2 Jazzy Jalisco, Dropbear SSH, Micro-ROS, and a real-time sensor hub.*
 
-
-*Run ROS 2 Humble, Micro-ROS ,Groq Cloud LLM and RIO ROS2 packages on your Android device using Termux and ROS2Sense Mobile App for sensor hub*
+[**Explore Documentation**](DEVELOPER.md) • [**Contributing Guide**](CONTRIBUTING.md) • [**Code of Conduct**](CODE_OF_CONDUCT.md) • [**Report Bug**](.github/ISSUE_TEMPLATE/bug_report.md)
 </div>
 
 ---
 
-## 📋 Prerequisites
+## 📑 Table of Contents
 
-- 📱 Android device running Android 7.0 or higher
-- 💾 At least 16GB of free storage space
-- 🌐 Internet connection
-- 📱 Termux app (latest version)
-- 📱 ROS2Sense Mobile App (latest version)
-
----
-
-## 🚀 Installation Steps
-
-### 📥 1. Install Termux App
-
-1. Download the latest Termux app from the official releases:
-   <details>
-   <summary>Download Links</summary>
-
-   - For Android 7+ devices: [termux-app_v0.119.0-beta.2+apt-android-7-github-debug_universal.apk](https://github.com/termux/termux-app/releases/download/v0.119.0-beta.2/termux-app_v0.119.0-beta.2+apt-android-7-github-debug_universal.apk)
-   - For Android 5/6 devices: [termux-app_v0.119.0-beta.2+apt-android-5-github-debug_universal.apk](https://github.com/termux/termux-app/releases/download/v0.119.0-beta.2/termux-app_v0.119.0-beta.2+apt-android-5-github-debug_universal.apk)
-   </details>
-
-2. Install the downloaded APK on your device
-3. Open Termux app and grant necessary permissions
-
-### ⚙️ 2. Installation Process (Two-Step)
-
-<details>
-<summary><b>Step 1: Setup Ubuntu (in Termux)</b></summary>
-
-Update Termux and get required packages
-```bash
-termux-change-repo -y && pkg update -y && pkg upgrade -y && pkg install wget -y
-```
-Download and run Ubuntu setup script
-```bash
-wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ubuntu.sh && chmod +x setup_ubuntu.sh && ./setup_ubuntu.sh
-```
-</details>
-
-<details>
-<summary><b>Step 2: Install ROS 2 and RIO (in Ubuntu)</b></summary>
-
-After Ubuntu is installed:
-1. Start Ubuntu environment in Termux(if not already started):
-```bash
-./start-ubuntu22.sh
-```
-2. Update and install required packages
-```bash
-apt update && apt upgrade -y && apt install wget -y
-```
-3. Download and run ROS 2 setup script
-```bash
-wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/setup_ros2.sh && chmod +x setup_ros2.sh && ./setup_ros2.sh
-```
-</details>
-
-The installation process will:
-- 📦 Install Ubuntu 22.04 using Andronix
-- 🔧 Set up ROS 2 Humble
-- 🤖 Install Micro-ROS
-- 🚀 Set up RIO ROS2 packages
-- ⚙️ Configure all environments
-> 📝 **Note(CycloneDDS):** By default `ros2_setup.sh` installs and configures CycloneDDS (rmw_cyclonedds_cpp) as the ROS 2 middleware for better performance, as it is lightweight and efficient for mobile.
-
-> 📝 **Note(Domain ID):** For remote communication, ROS_DOMAIN_ID is set to 156 by default in `ros2_setup.sh`.You can change it to any number between 0-232 in `ros2_setup.sh` line 144 and restart termux.
-
-
-
-## 📝 Post-Installation
-
-After successful installation:
-1. 🔄 Restart your Termux app
-2. 🔧 Your ROS 2 environment will be automatically sourced 
-3. ✅ Run `ros2 --help` to verify the installation
-
+- [Overview](#-overview)
+- [What Rosdroid Replaces](#-what-rosdroid-replaces)
+- [Why Headless Server?](#-why-headless-server)
+- [Architecture & Interfaces](#-architecture--interfaces)
+- [Quick Start](#-quick-start)
+- [Remote Terminal Access](#-remote-terminal-access)
+  - [SSH Access (Ports 2222 & 2224)](#-ssh-access-ports-2222--2224)
+  - [In-App Neon Green Terminal Console](#-in-app-neon-green-terminal-console)
+- [ROS 2 Communication & PC Integration](#-ros-2-communication--pc-integration)
+  - [1-Step PC Setup (`source_pc.sh`)](#1-step-pc-setup-source_pcsh)
+  - [Available Topics & Sensors](#available-topics--sensors)
+  - [Controlling Hardware over ROS 2](#controlling-hardware-over-ros-2)
+- [USB OTG Micro-ROS Bridge](#-usb-otg-micro-ros-bridge)
+- [Developer Guide & Community](#-developer-guide--community)
+- [Troubleshooting & FAQs](#-troubleshooting--faqs)
+- [License](#-license)
 
 ---
 
+## 🌟 Overview
 
-## 📱 Using ROS2Sense Mobile App
+Rosdroid turns standard Android smartphones (`arm64-v8a`) into an all-in-one robotics brain, replacing a Raspberry Pi 5 + IMU/camera breakout boards + battery power bank + display + LTE/Wi-Fi modem.
 
-ROS2Sense transforms your smartphone into a powerful ROS 2 sensor hub, providing:
-
-### Available Sensors 🎯
-- 📡 Accelerometer – Detect motion and orientation
-- 🔄 Gyroscope – Measure angular velocity
-- 🧭 Magnetometer – Get compass direction
-- 📍 GPS – Track precise location for navigation
-- 📸 Cameras – Use mobile cameras for vision-based applications
-- 🌫 IR Sensor – Use infrared commands to control home appliances like ACs and TVs (Comming Soon)
-- 💡 Ambient Light Sensor – Detect environment light
-- 🔊 Microphone & Speaker – Enable voice interactions & Text to speech
-- 🆔 Fingerprint/Face ID – Biometric security and authentication for robots
-- 📲 Display Output – Use your mobile screen for animated robotic expressions
-- Inbuilt Madgwick Filter for IMU data fusion, Hotword Detection.
-- Hot word detection "RIO"
-
-### Download ROS2Sense from [Google Play Store](https://play.google.com/store/apps/details?id=com.botforge.rio)
-<div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 25px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/listening.jpg" alt="Listening Mode" style=" border-radius: 10px; max-width: 100%;">
-    </div>
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/speaking.jpg" alt="Speaking Mode" style=" border-radius: 10px; max-width: 100%;">
-    </div>
-    <div style="flex: 0 0 calc(50% - 15px); box-sizing: border-box;">
-        <img src="./images/settings3.jpg" alt="Settings Page 3" style=" border-radius: 10px;  max-width: 100%;">
-    </div>
-</div>
-
-### Groq API Setup for Voice Features
-
-To use voice interactive features in ROS2Sense Mobile App, you'll need a Groq API key:
-
-1. Create an account at [Groq API Console](https://console.groq.com/login)
-2. Get your API key
-3. Set the API key as an environment variable:
-   ```bash
-   export GROQ_API_KEY=<your_groq_api_key>
-   ```
-
-4. Permanently add the API key to the environment variable GROQ_API_KEY in the ~/.bashrc file
-   ```bash
-   echo "export GROQ_API_KEY=<your_groq_api_key>" >> ~/.bashrc
-   ```
+- **Zero Root Required**: Uses a lightweight sandboxed **PRoot** guest filesystem.
+- **Headless Ubuntu Server 24.04 (Noble)**: Pure server configuration without graphical desktop bloat for maximum performance and stability.
+- **ROS 2 Jazzy Jalisco**: Pre-configured with **Eclipse Cyclone DDS** (`rmw_cyclonedds_cpp`) and custom `patch_getifaddrs.so`.
+- **Fast Remote Access**: Multi-port Dropbear SSH (`robot:rosdroid` on port 2222, `root:rosdroid` on port 2224) plus an in-app interactive terminal console.
+- **Rich Hardware Sensor Hub**: Dual cameras (hardware JPEG compression), 9-DOF IMU fused with a native C++ Madgwick AHRS filter, physical torch LED control, battery telemetry, GPS, ambient light, and speech recognition.
+- **USB OTG Micro-ROS Bridge**: Plug-and-play serial relay for ESP32, Teensy, and STM32 motor controllers to `micro_ros_agent`.
 
 ---
 
-## 🚀 Usage
+## 💡 What Rosdroid Replaces
 
-### Launch Options
+By installing Rosdroid on an Android phone, you eliminate hundreds of dollars in external hardware modules:
 
-There are three ways to launch RIO nodes:
+| Expensive External Hardware | Replaced By Built-in Phone Feature | ROS 2 Output Topic |
+|---|---|---|
+| **Single Board Computer** *(Raspberry Pi 5 / Jetson, $80-$150)* | **Octa-Core ARM64 CPU + PRoot Ubuntu 24.04** | Core ROS 2 Node (`/rosdroid_robot`) |
+| **Dual Camera Modules** *(Pi Cam V3 / Webcams, $50-$80)* | **High-Res Front & Back Cameras (Hardware JPEG)** | `/camera/front/image_raw/compressed`<br>`/camera/back/image_raw/compressed` |
+| **9-DOF IMU Breakout** *(BNO055 / MPU6050, $15-$35)* | **Built-in IMU fused with Native C++ Madgwick** | `/imu/data` *(quaternion orientation & rates)* |
+| **Power Bank / UPS Battery Hat** *($30-$50)* | **Built-in 4000-5000 mAh Li-Po Battery + BMS** | `/battery` *(voltage, %, charge status)* |
+| **Robot Display / OLED Screen** *($30-$60)* | **AMOLED Touch Display (Animated Cyber Eyes)** | `/expression` *(happy, thinking, alert, etc.)* |
+| **External Robot Spotlight / LED** *($10)* | **High-Lumen Camera LED Flash Torch** | `/torch` *(hardware toggle on/off)* |
+| **GPS / GNSS Receiver** *(NEO-6M, $20)* | **Built-in Multi-Constellation GPS Receiver** | `/gps` *(`sensor_msgs/NavSatFix`)* |
+| **Ambient Light Sensor** *(BH1750, $8)* | **Built-in Ambient Light Sensor** | `/illuminance` *(`sensor_msgs/Illuminance`)* |
+| **ToF / Ultrasonic Distance Sensor** *(HC-SR04, $8)* | **Built-in Time-of-Flight / Proximity Sensor** | `/tof` *(`sensor_msgs/Range`)* |
+| **Microphone Array & Speaker** *($25)* | **Stereo Microphones & Loudspeaker** | Speech-to-Text, Wake Word, TTS |
+| **Wi-Fi 6 & 4G/5G LTE Hat** *($60)* | **Built-in Wi-Fi & Cellular Modem** | Native ROS 2 Cyclone DDS over Wi-Fi |
+| **USB Serial Converter** *($10)* | **USB-C OTG Micro-ROS Bridge** | Relays ESP32/STM32 serial to UDP 8888 |
 
-1. **Mobile Nodes Launch**
-   - Launches smartphone-related functionality
-   - Includes LLM, WebRTC, and WebSocket nodes
+---
 
-2. **PCB Nodes Launch** 
-   - Launches hardware-related components
-   - Includes Micro-ROS agent and sensor nodes
+## ⚡ Why Headless Server?
 
-3. **Real Robot Launch**
-   - Combines both mobile and PCB functionality
-   - Full robot system deployment
+Traditional attempts to run Linux on Android often install heavy desktop environments (TigerVNC, X11, Openbox, WebSockets/noVNC). For robotics companion computers, this causes severe issues:
 
-#### 1.1 Mobile Nodes Launch
-The mobile nodes launch file (`mobile_nodes.launch.py`) starts components related to the smartphone functionality:
+1. **Massive Memory Savings**: Eliminating X11, TigerVNC, and WebSockets saves **~150MB to 200MB of RAM**, critical for preventing Android's Low Memory Killer (LMK) or Phantom Process Killer from terminating background robot nodes.
+2. **Lower CPU Thermals & Power Draw**: No idle desktop rendering means the phone runs cool, extending battery life by ~40% during continuous navigation runs.
+3. **Robotics Best Practice**: Standard companion computers (Raspberry Pi, Jetson Orin) run headless servers. Visualization tools (RViz2, `rqt`, Foxglove Studio) are meant to run natively on the operator's PC over DDS Wi-Fi.
 
-```bash
-# Launch mobile-related nodes
-ros2 launch rio_bringup mobile_nodes.launch.py llm_backend:=groq
+---
+
+## 🔌 Architecture & Interfaces
+
+```
+                  ┌──────────────────────────────────────────────┐
+                  │           Android Smartphone Device          │
+                  │                                              │
+                  │   ┌──────────────────────────────────────┐   │
+                  │   │      Rosdroid Native App (Kotlin)    │   │
+                  │   │  • CameraX Streamer (Front & Back)   │   │
+                  │   │  • IMU + Native C++ Madgwick Filter  │   │
+                  │   │  • GPS, Light, Battery, Speech Hub   │   │
+                  │   │  • Physical LED Torch Controller     │   │
+                  │   │  • USB OTG CDC/ACM Serial Bridge     │   │
+                  │   │  • RosBridge TCP Socket Server (9871)│   │
+                  │   └──────────────────┬───────────────────┘   │
+                  │                      │ Unix Socket / TCP     │
+                  │   ┌──────────────────▼───────────────────┐   │
+                  │   │ Headless PRoot Guest (Ubuntu Server) │   │
+                  │   │  • ROS 2 Jazzy (`/rosdroid_robot`)   │   │
+                  │   │  • Dropbear SSH (Port 2222, 2224)    │   │
+                  │   │  • micro_ros_agent (UDP 8888)        │   │
+                  │   │  • Eclipse Cyclone DDS + patch hook  │   │
+                  │   └──────────────────────────────────────┘   │
+                  └──────────────────────┬───────────────────────┘
+                                         │ Wi-Fi Network
+            ┌────────────────────────────┴────────────────────────────┐
+            │                                                         │
+ ┌──────────▼──────────┐                                   ┌──────────▼──────────┐
+ │    Remote PC CLI    │                                   │  Microcontroller    │
+ │ • ROS 2 Jazzy CLI   │                                   │ • ESP32 / STM32     │
+ │ • SSH Shell (2222)  │                                   │ • USB-C OTG Cable   │
+ │ • RViz2 & rqt       │                                   │ • micro_ros_agent   │
+ │ • Topics & Services │                                   │ • Motor Controller  │
+ └─────────────────────┘                                   └─────────────────────┘
 ```
 
-This launch file includes:
-- **Ollama LLM Node**: Local LLM for robot voice interactions
-- **Groq LLM Node**: Cloud LLM for robot voice interactions
-- **WebRTC Node**: Video streaming server (port 8080)
-- **Rosbridge WebSocket**: Enables ROS2-to-WebSocket communication
+---
 
-**Mobile Node Launch Parameters**:
-| Parameter | Description | Default Value | Options |
-|-----------|-------------|---------------|---------|
-| `llm_backend` | LLM backend | `ollama` | `ollama`, `groq` |
+## 🚀 Quick Start
 
-> 📝 **Note:** Use `llm_backend:=groq` to use groq cloud LLM for voice interactions as ollama is resource intensive.
-
-> 📝 **Note:** If you encounter issues [getifaddrs(): permission denied](#getifaddrs-permission-denied)  refer to troubleshooting section for more details.
-
-#### 1.2 PCB Nodes Launch
-The PCB nodes launch file (`pcb_nodes.launch.py`) manages hardware-related components:
-
+### 1. Build and Install the App
 ```bash
-# Launch PCB-related nodes
-ros2 launch rio_bringup pcb_nodes.launch.py agent_port:=8888
+cd rosdroid_app
+./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+*Or download the latest pre-built APK from [GitHub Releases](https://github.com/botforge-robotics/ros2_android/releases).*
+
+### 2. App Permissions & 1-Click Provisioning
+1. Launch **Rosdroid** on the smartphone.
+2. Grant permissions when prompted (**Camera**, **Location**, **Notification**).
+3. On the **Setup** / **Dashboard** screen, tap **Start 1-Click Installation**.
+4. The app automatically extracts the Ubuntu rootfs, installs `patch_getifaddrs.so`, configures DDS, starts the Dropbear SSH server, and launches the `/rosdroid_robot` core node.
+
+---
+
+## 🔑 Remote Terminal Access
+
+Check your device's Wi-Fi IP address displayed at the top of the Dashboard screen (e.g., `192.168.0.152`).
+
+### 💻 SSH Access (Ports 2222 & 2224)
+
+Rosdroid runs Dropbear SSH servers directly inside the PRoot sandbox:
+
+| Account | Port | Default Password | Recommended Use |
+|---------|------|------------------|-----------------|
+| `robot` | **2222** | `rosdroid` | Day-to-day ROS 2 development, running nodes, scripts |
+| `root`  | **2224** | `rosdroid` | Package management (`apt update`), root administration |
+
+#### Connect from your PC / Mac / Tablet:
+```bash
+# Connect as standard robot user
+ssh robot@<phone-ip> -p 2222
+
+# Or connect as root
+ssh root@<phone-ip> -p 2224
 ```
 
-**PCB Launch Parameters**:
-| Parameter | Description | Default Value |
-|-----------|-------------|---------------|
-| `agent_port` | Micro-ROS agent UDP port | `8888` |
-
-This launch file includes:
-- **Micro-ROS Agent**: Handles communication with ESP32
-- **Odometry TF Broadcaster**: Publishes transform data
-- **LIDAR UDP Node**: Manages LIDAR sensor data
-
-#### 1.3 Real Robot (Mobile+PCB) Launch
-
+#### Inside the Phone Shell:
 ```bash
-# Launch real robot nodes
-ros2 launch rio_bringup rio_real_robot.launch.py \
-  use_sim_time:=false \
-  agent_port:=8888 \
-  llm_backend:=groq
-```
+# List active ROS 2 nodes
+ros2 node list
+# Output: /rosdroid_robot
 
-**Real Robot Parameters**:
-| Parameter | Description | Default Value | Options |
-|-----------|-------------|---------------|---------|
-| `use_sim_time` | Use simulation clock (must be false for real hardware) | `false` | `true`/`false` |
-| `agent_port` | Micro-ROS agent UDP port | `8888` | Any available port number |
-| `llm_backend` | LLM backend | `ollama` | `ollama`, `groq` |
-
-> 📝 **Note:** Make sure to set up the domain and network configuration before launching any nodes to ensure proper communication between components.
-
-#### 2. In ROS2Sense App 📱
-- Enter `0.0.0.0` as ROS2 Bridge IP on connecting screen (since ROS2 is running on same device) only if `mobile_nodes.launch.py` or `rio_real_robot.launch.py` is launched.
-
-#### 3. On Desktop PC with ROS2 Humble installed 💻
-
-```bash
-export ROS_DOMAIN_ID=156 
-export ROS_LOCALHOST_ONLY=0
-```
-> 📝 **Note:** ROS_DOMAIN_ID is set to 156 by default in `setup_ros2.sh` in termux.you can change it to any number between 0-232 in `setup_ros2.sh` line 144.
-
-or export to .bashrc for permanent use
-```bash
-echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc
-echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
-```
-
-check topics published by mobile nodes
-```bash
+# List active ROS 2 topics
 ros2 topic list
+
+# Echo live IMU telemetry
+ros2 topic echo /imu/data --once
 ```
 
+---
 
+### 🖥️ In-App Neon Green Terminal Console
+
+The app includes an embedded interactive terminal console on the **Console Tab**:
+- **High-Contrast Green Theme**: Matches the robot's cybernetic theme and provides clear visibility outdoors.
+- **1-Tap Preset Action Chips**: Tap chips to instantly execute commands without typing:
+  - `ros2 node list`
+  - `ros2 topic list`
+  - `echo /battery`
+  - `echo /imu/data`
+  - `source jazzy`
+  - `ps aux`
+- **Interactive Bash Prompt**: Full ANSI keyboard input for running custom bash scripts and debugging.
 
 ---
 
-### 🌐 ROS Domain Setup for Remote Communication
+## 🌐 ROS 2 Communication & PC Integration
 
-To enable communication between your mobile device (running ROS 2 in Termux/Ubuntu) and a remote PC running ROS 2:
+The phone runs on **`ROS_DOMAIN_ID=156`** with **ROS 2 Jazzy**.
 
-1. **On your remote PC** 💻
-   ```bash
-   export ROS_DOMAIN_ID=156 
-   export ROS_LOCALHOST_ONLY=0
-   ```
- 
-   or export to .bashrc for permanent use
-   ```bash
-   echo "export ROS_DOMAIN_ID=156" >> ~/.bashrc
-   echo "export ROS_LOCALHOST_ONLY=0" >> ~/.bashrc
-   ```
+### 1-Step PC Setup (`source_pc.sh`)
+Because PC Linux environments often have Docker bridge networks (`172.17.x.x`, `172.18.x.x`) that trap DDS multicast packets, this repository provides a dedicated Fast-DDS network profile ([`fastdds_pc.xml`](fastdds_pc.xml)) and helper script ([`source_pc.sh`](source_pc.sh)).
 
-> 🔒 **Note:** ROS_DOMAIN_ID is set to 156 by default in `termux`.You can change it to any number between 0-232 in `setup_ros2.sh` line 144 and restart termux.
+In your PC terminal:
+```bash
+source source_pc.sh
+```
 
+This automatically:
+- Sources `/opt/ros/jazzy/setup.bash`
+- Exports `ROS_DOMAIN_ID=156`
+- Configures Fast-DDS to bind cleanly to your active Wi-Fi interface and direct peer locators to the phone
+- Restarts the `ros2 daemon`
+
+---
+
+### Available Topics & Sensors
+
+| Topic | Message Type | Description |
+|-------|--------------|-------------|
+| `/imu/data` | `sensor_msgs/msg/Imu` | Fused 9-DOF orientation quaternion (Madgwick AHRS), angular rates, accelerations |
+| `/battery` | `sensor_msgs/msg/BatteryState` | Voltage, capacity percentage, charging status |
+| `/camera/front/image_raw/compressed` | `sensor_msgs/msg/CompressedImage` | Front selfie camera hardware JPEG stream |
+| `/camera/back/image_raw/compressed` | `sensor_msgs/msg/CompressedImage` | Back main camera hardware JPEG stream |
+| `/torch` | `std_msgs/msg/Bool` | Physical camera LED flashlight control (`true` = ON, `false` = OFF) |
+| `/cmd_vel` | `geometry_msgs/msg/Twist` | Velocity commands for motor drivers |
+| `/expression` | `std_msgs/msg/String` | Robot face mood (`happy`, `thinking`, `alert`, `speaking`, `neutral`) |
+| `/gps` | `sensor_msgs/msg/NavSatFix` | Outdoor GPS coordinates and fix quality |
+| `/illuminance` | `sensor_msgs/msg/Illuminance` | Ambient light sensor lux readings |
+| `/tof` | `sensor_msgs/msg/Range` | Proximity / Time-of-Flight distance sensor |
+| `/speech_recognition/result` | `std_msgs/msg/String` | Speech-to-text recognition transcript |
+| `/speech_recognition/hotword_detected`| `std_msgs/msg/String` | Triggered wake words |
 
 ---
 
-### 🔑 SSH Login (Termux)
+### Controlling Hardware over ROS 2
 
-To remotely access your Termux environment via SSH from another device (like your computer), follow these steps:
+From your PC terminal (after running `source source_pc.sh`):
 
-1. **Activate SSH in Termux** 
-   ```bash
-   sshd
-   ```
-2. **Get your Termux username** 👤
-   ```bash
-   whoami
-   ```
-   This will display your Termux username that you'll need for SSH login.
+#### 1. Turn Phone Torch ON / OFF
+```bash
+# Turn ON physical camera torch
+ros2 topic pub -w 0 -1 /torch std_msgs/msg/Bool "data: true"
 
-3. **Find your device's IP address** 📍
-   ```bash
-   ifconfig
-   ```
-   Look for the `wlan0` section and find the `inet` address - this is your device's IP address on the WiFi network.
-   For example: `inet 192.168.1.100`
+# Turn OFF physical camera torch
+ros2 topic pub -w 0 -1 /torch std_msgs/msg/Bool "data: false"
+```
 
-4. **Connect via SSH from another device** 🔌
-   ```bash
-   ssh <username>@<ip_address> -p 8022
-   ```
-   Example: `ssh u0_a572@192.168.1.100 -p 8022`
-   
-   > **Note:** Port 8022 is Termux's default SSH port, different from the standard port 22.
+#### 2. Echo Live Madgwick-Fused IMU Telemetry
+```bash
+ros2 topic echo /imu/data --once
+```
 
-5. **Enter your password** 🔐
-   - You'll be prompted for the password you set during the Ubuntu installation
-   - Type your password (it won't be visible as you type)
-   - Press Enter to submit
+#### 3. Echo Live Battery Status
+```bash
+ros2 topic echo /battery --once
+```
 
-6. **Success!** ✨
-   You should now see the Termux prompt, indicating a successful SSH connection.
+#### 4. View Live Camera Stream in RViz2 / `image_view`
+```bash
+ros2 run image_view image_view --ros-args -r image:=/camera/back/image_raw/compressed -p image_transport:=compressed
+```
 
-7. **Start Ubuntu** 🚀
-   ```bash
-   ./start-ubuntu22.sh
-   ```
-   This launches your Ubuntu environment within the SSH session.
+#### 5. Change Robot Face Mood
+```bash
+ros2 topic pub -w 0 -1 /expression std_msgs/msg/String "data: 'happy'"
+```
+
+#### 6. Send Drive Commands
+```bash
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
+```
 
 ---
-## 🔗 Related Repositories
 
-- [RIO Hardware](https://github.com/botforge-robotics/rio_hardware) - Hardware design files, BOM and assembly instructions
-- [RIO Firmware](https://github.com/botforge-robotics/rio_firmware) - Micro-ROS firmware for the RIO controller board
-- [RIO ROS2](https://github.com/botforge-robotics/rio_ros2) - ROS2 packages for navigation, control, and sensor integration
+## 🔌 USB OTG Micro-ROS Bridge
+
+You can connect an ESP32, Teensy, Arduino, or STM32 motor driver board directly to your phone:
+
+1. Plug the microcontroller into the phone's USB Type-C port using an OTG adapter.
+2. In the Android permission dialog, tap **Always allow** and **OK**.
+3. Rosdroid relays serial packets asynchronously to localhost UDP port `8888`.
+4. In the phone terminal (via SSH or the app's Console tab):
+   ```bash
+   ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
+   ```
 
 ---
-## ❗ Troubleshooting
 
-If you encounter any issues:
+## 👥 Developer Guide & Community
 
-1. **getifaddrs(): permission denied** 🔄
-   we have developed a patch to fix the getifaddrs error.
-   Download the patch:
-   ```bash
-   wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/patch_getifaddrs.c
-   ```
-   
-   Compile the patch:
-   ```bash
-   gcc -shared -fPIC -o patch_getifaddrs.so patch_getifaddrs.c -ldl
-   ```
-   
-   Apply the patch temporarily:
-   ```bash
-   export LD_PRELOAD=$PWD/patch_getifaddrs.so
-   ```
-   
-   Or apply permanently by adding to .bashrc:
-   ```bash
-   echo "export LD_PRELOAD=$PWD/patch_getifaddrs.so" >> ~/.bashrc
-   ```
-   
-   Test the patch:
-   ```bash
-   wget https://raw.githubusercontent.com/botforge-robotics/ros2_android/refs/heads/humble/test_getifaddrs.c
-   ```
-   ```bash
-   gcc -o test_getifaddrs test_getifaddrs.c
-   ```
-   ```bash
-   ./test_getifaddrs
-   ```
-   Output:
-   ```bash
-   Network interfaces detected:
-   Interface: wlan0
-      IPv4 Address: 192.168.0.195
-   Interface: lo
-      IPv4 Address: 127.0.0.1
-   Interface: rmnet_data3
-      IPv4 Address: 100.65.187.41
-   ```
-2. 🌐 Check your internet connection
+- 🛠️ **Engineering Guide**: Read [DEVELOPER.md](DEVELOPER.md) for deep dives into PRoot sandboxing, JNI bindings, and C++ Madgwick filter implementation.
+- 🤝 **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for pull request guidelines, coding standards, and local test setups.
+- 📜 **Code of Conduct**: Review [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+- 🔒 **Security**: Review [SECURITY.md](SECURITY.md) for vulnerability disclosure procedures.
 
-3. 🔄 If the first script fails:
-   - Try running `setup_ubuntu.sh` again
+---
 
-4. 🔧 If the second script fails:
-   - Make sure you're in the Ubuntu environment
-   - Try running `setup_ros2.sh` again
+## 🛠️ Troubleshooting & FAQs
 
-5. 📝 Check the error messages in the script output
-
-6. **Permission Issues** 🔒
-   If you encounter permission errors:
+### Topics do not appear on PC
+1. Verify both your PC and phone are on the exact same Wi-Fi network (or connect PC directly to phone's mobile hotspot).
+2. Ensure you ran `source source_pc.sh` on your PC.
+3. Restart the ROS 2 daemon on your PC:
    ```bash
-   chmod +x setup_ubuntu.sh
-   chmod +x setup_ros2.sh
+   ros2 daemon stop
+   ros2 topic list --no-daemon
    ```
 
+### `getifaddrs(): Permission denied`
+Android PRoot cannot read network interfaces through netlink sockets due to SELinux restrictions. Rosdroid includes `patch_getifaddrs.so`, preloaded via `LD_PRELOAD=/usr/local/lib/patch_getifaddrs.so`, which provides interface information to Cyclone DDS seamlessly.
 
+### `ros2 node list` hangs or crashes
+In PRoot sandboxes, the background ROS 2 daemon process cannot communicate via shared memory sockets. Rosdroid configures `use_daemon = False` in the ROS 2 CLI and sets `CYCLONEDDS_URI` in `/etc/profile.d/ros.sh` to ensure all CLI queries execute directly without daemon reliance.
 
-## 📌 Notes
+### Torch control conflict with Camera
+On Android, the torch and camera share the same camera hardware module. Rosdroid controls the torch through the active CameraX session, allowing you to use both camera streaming and torch lighting simultaneously without conflicts.
 
-- ⏳ The installation process may take some time depending on your device and internet connection
-- 🔋 Make sure your device is plugged into a power source during installation
-
-## 🤝 Contributing
-
-Feel free to submit issues and enhancement requests!
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-<b>Made with ❤️ by BotForge Robotics</b>
-</div>
+MIT License. Developed with ❤️ for open robotics by BotForge.

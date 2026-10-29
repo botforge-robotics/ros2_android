@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Espressif ESP32 / ESP32-S2 / ESP32-S3 / ESP32-C3 / ESP32-C6 -->
+    <usb-device vendor-id="12346" /> <!-- 0x303A -->
+    <!-- FTDI (FT232R, FT2232, etc.) -->
+    <usb-device vendor-id="1027" />  <!-- 0x0403 -->
+    <!-- Silicon Labs CP210x -->
+    <usb-device vendor-id="4292" />  <!-- 0x10C4 -->
+    <!-- Qinheng CH340 / CH341 -->
+    <usb-device vendor-id="6790" />  <!-- 0x1A86 -->
+    <!-- Arduino / CDC ACM -->
+    <usb-device vendor-id="9025" />  <!-- 0x2341 -->
+    <!-- Raspberry Pi Pico / RP2040 / RP2350 -->
+    <usb-device vendor-id="11914" /> <!-- 0x2E8A -->
+    <!-- STMicroelectronics (STM32 VCP) -->
+    <usb-device vendor-id="1155" />  <!-- 0x0483 -->
+</resources>

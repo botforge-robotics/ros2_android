@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CycloneDDS xmlns="https://cdds.io/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Domain id="any">
+        <General>
+            <NetworkInterfaceAddress>auto</NetworkInterfaceAddress>
+            <AllowMulticast>true</AllowMulticast>
+        </General>
+        <Discovery>
+            <ParticipantIndex>auto</ParticipantIndex>
+        </Discovery>
+    </Domain>
+</CycloneDDS>

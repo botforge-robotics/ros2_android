@@ -1,0 +1,78 @@
+name: Release Build & Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-release:
+    name: Build Release Package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Android SDK & NDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK & CMake
+        run: |
+          sdkmanager --install "ndk;25.1.8937393" "cmake;3.22.1"
+
+      - name: Make Gradle Wrapper Executable
+        run: |
+          cd rosdroid_app
+          chmod +x gradlew
+
+      - name: Build Debug & Unsigned Release APKs
+        run: |
+          cd rosdroid_app
+          ./gradlew assembleDebug
+
+      - name: Package Release Assets
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          mkdir -p release_assets
+          cp rosdroid_app/app/build/outputs/apk/debug/app-debug.apk "release_assets/rosdroid-${TAG_NAME}.apk"
+          cd release_assets
+          sha256sum "rosdroid-${TAG_NAME}.apk" > "rosdroid-${TAG_NAME}.sha256"
+          cat "rosdroid-${TAG_NAME}.sha256"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_assets/*.apk
+            release_assets/*.sha256
+          name: "Rosdroid Release ${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## 🤖 Rosdroid Release ${{ github.ref_name }}
+            
+            Welcome to the official release of **Rosdroid: Headless ROS 2 Android Platform**!
+            
+            ### 🌟 Key Highlights
+            - **ROS 2 Jazzy Jalisco**: Pre-configured with Eclipse Cyclone DDS (`rmw_cyclonedds_cpp`).
+            - **Headless Ubuntu Server 24.04 (Noble)**: Zero VNC/GUI bloat for maximum RAM and CPU efficiency.
+            - **Dropbear SSH Server**: Development user (`robot:rosdroid` on port 2222) and admin user (`root:rosdroid` on port 2224).
+            - **Real-Time Sensor Hub**: 9-DOF IMU fused with native C++ Madgwick filter (`/imu/data`), dual hardware cameras (`/camera/*`), battery telemetry (`/battery`), physical LED torch control (`/torch`), and GPS (`/gps`).
+            - **Micro-ROS USB-C Bridge**: Direct OTG serial relay to ESP32 / STM32 motor controllers (`micro_ros_agent` UDP 8888).
+            - **In-App Neon Green Console**: Embedded PRoot terminal with 1-tap action chips.
+            
+            ### 📥 Installation
+            Download `rosdroid-${{ github.ref_name }}.apk` below and install directly onto your `arm64-v8a` Android smartphone.

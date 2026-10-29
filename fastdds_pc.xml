@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <transport_descriptors>
+        <transport_descriptor>
+            <transport_id>CustomUDPTransport</transport_id>
+            <type>UDPv4</type>
+            <!-- Bind specifically to PC Wi-Fi interface (wlp0s20f3) to avoid sending DDS traffic over docker bridges -->
+            <interfaceWhiteList>
+                <address>wlp0s20f3</address>
+            </interfaceWhiteList>
+        </transport_descriptor>
+    </transport_descriptors>
+
+    <participant profile_name="CustomUDPTransportParticipant" is_default_profile="true">
+        <rtps>
+            <useBuiltinTransports>false</useBuiltinTransports>
+            <userTransports>
+                <transport_id>CustomUDPTransport</transport_id>
+            </userTransports>
+            <builtin>
+                <initialPeersList>
+                    <!-- Phone unicast IP -->
+                    <locator>
+                        <udpv4>
+                            <address>192.168.0.152</address>
+                        </udpv4>
+                    </locator>
+                    <!-- Subnet broadcast -->
+                    <locator>
+                        <udpv4>
+                            <address>192.168.0.255</address>
+                        </udpv4>
+                    </locator>
+                    <!-- Global broadcast -->
+                    <locator>
+                        <udpv4>
+                            <address>255.255.255.255</address>
+                        </udpv4>
+                    </locator>
+                    <!-- Standard DDS multicast -->
+                    <locator>
+                        <udpv4>
+                            <address>239.255.0.1</address>
+                        </udpv4>
+                    </locator>
+                </initialPeersList>
+            </builtin>
+        </rtps>
+    </participant>
+</profiles>
