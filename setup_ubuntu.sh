@@ -32,7 +32,7 @@ if [ "$EUID" -eq 0 ]; then
     error_exit "Please do not run as root"
 fi
 
-echo -e "${GREEN}Starting installation of Ubuntu 22.04 and ROS 2 Humble on Termux...${NC}"
+echo -e "${GREEN}Starting installation of Ubuntu and ROS 2 Jazzy on Termux...${NC}"
 
 # Install neofetch and show system info
 info_message "Installing neofetch.."

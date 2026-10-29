@@ -7,7 +7,7 @@ We provide security updates and patches for the following versions:
 | Version | Supported          |
 | ------- | ------------------ |
 | 1.x.x (Jazzy) | :white_check_mark: |
-| < 1.0.0 (Legacy Humble) | :x: |
+| < 1.0.0 (Legacy) | :x: |
 
 ---
 
