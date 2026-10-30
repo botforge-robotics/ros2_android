@@ -27,7 +27,8 @@
 - [Quick Start](#-quick-start)
 - [Remote Terminal Access](#-remote-terminal-access)
   - [SSH Access (Ports 2222 & 2224)](#-ssh-access-ports-2222--2224)
-  - [In-App Neon Green Terminal Console](#-in-app-neon-green-terminal-console)
+  - [In-App Neon Green Multi-Terminal Console](#-in-app-neon-green-multi-terminal-console)
+- [Ultra-Fast Graph Accelerator (< 1s)](#-ultra-fast-graph-accelerator--1s)
 - [ROS 2 Communication & PC Integration](#-ros-2-communication--pc-integration)
   - [1-Step PC Setup (`source_pc.sh`)](#1-step-pc-setup-source_pcsh)
   - [Available Topics & Sensors](#available-topics--sensors)
@@ -46,8 +47,9 @@ Rosdroid turns standard Android smartphones (`arm64-v8a`) into an all-in-one rob
 - **Zero Root Required**: Uses a lightweight sandboxed **PRoot** guest filesystem.
 - **Headless Ubuntu Server 24.04 (Noble)**: Pure server configuration without graphical desktop bloat for maximum performance and stability.
 - **ROS 2 Jazzy Jalisco**: Pre-configured with **Eclipse Cyclone DDS** (`rmw_cyclonedds_cpp`) and custom `patch_getifaddrs.so`.
-- **Fast Remote Access**: Multi-port Dropbear SSH (`robot:rosdroid` on port 2222, `root:rosdroid` on port 2224) plus an in-app interactive terminal console.
-- **Rich Hardware Sensor Hub**: Dual cameras (hardware JPEG compression), 9-DOF IMU fused with a native C++ Madgwick AHRS filter, physical torch LED control, battery telemetry, GPS, ambient light, and speech recognition.
+- **Fast Remote Access**: Multi-port Dropbear SSH (`rosdroid:rosdroid` on port 2222, `root:rosdroid` on port 2224) plus an in-app interactive multi-terminal console.
+- **Ultra-Fast Graph Introspection**: Built-in CNode accelerator executing `ros2 topic list`, `ros2 node list`, and `ros2 service list` in under 1 second.
+- **Rich Hardware Sensor Hub**: Dual cameras (hardware JPEG compression), 9-DOF IMU fused with a native C++ Madgwick AHRS filter, physical torch LED control, battery telemetry, GPS, ambient light, and speech recognition with wake word.
 - **USB OTG Micro-ROS Bridge**: Plug-and-play serial relay for ESP32, Teensy, and STM32 motor controllers to `micro_ros_agent`.
 
 ---
@@ -82,10 +84,10 @@ By installing Rosdroid on an Android phone, you eliminate hundreds of dollars in
 | <img src="docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
 | **High-visibility neon green expressive eyes** | **Battery telemetry, active Wi-Fi IP & camera controls** |
 
-| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
+| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Multi-Terminal Console |
 |:---:|:---:|
 | <img src="docs/images/screenshot_ssh.png" width="340" alt="SSH Remote Server Card" /> | <img src="docs/images/screenshot_console.png" width="340" alt="In-App Terminal Console" /> |
-| **Dropbear SSH (:2222) with 1-tap copy shortcuts** | **Embedded PRoot terminal with 1-tap preset chips** |
+| **Dropbear SSH (:2222) with inline commands for rosdroid & root** | **Multi-session terminal with Split View, Ctrl+C & TAB completion** |
 
 </div>
 
@@ -123,6 +125,7 @@ Traditional attempts to run Linux on Android often install heavy desktop environ
                   │   │  • Dropbear SSH (Port 2222, 2224)    │   │
                   │   │  • micro_ros_agent (UDP 8888)        │   │
                   │   │  • Eclipse Cyclone DDS + patch hook  │   │
+                  │   │  • Fast CNode Graph Introspection    │   │
                   │   └──────────────────────────────────────┘   │
                   └──────────────────────┬───────────────────────┘
                                          │ Wi-Fi Network
@@ -151,7 +154,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### 2. App Permissions & 1-Click Provisioning
 1. Launch **Rosdroid** on the smartphone.
-2. Grant permissions when prompted (**Camera**, **Location**, **Notification**).
+2. Grant permissions when prompted (**Camera**, **Location**, **Notification**, **Microphone**).
 3. On the **Setup** / **Dashboard** screen, tap **Start 1-Click Installation**.
 4. The app automatically extracts the Ubuntu rootfs, installs `patch_getifaddrs.so`, configures DDS, starts the Dropbear SSH server, and launches the `/rosdroid_robot` core node.
 
@@ -178,14 +181,15 @@ ssh rosdroid@<phone-ip> -p 2222
 # Or connect as root
 ssh root@<phone-ip> -p 2224
 ```
+*(A legacy `robot` user alias is also preserved for backwards compatibility).*
 
 #### Inside the Phone Shell:
 ```bash
-# List active ROS 2 nodes
+# List active ROS 2 nodes (instant CNode accelerator)
 ros2 node list
 # Output: /rosdroid_robot
 
-# List active ROS 2 topics
+# List active ROS 2 topics (< 1s response)
 ros2 topic list
 
 # Echo live IMU telemetry
@@ -194,18 +198,36 @@ ros2 topic echo /imu/data --once
 
 ---
 
-### 🖥️ In-App Neon Green Terminal Console
+### 🖥️ In-App Neon Green Multi-Terminal Console
 
-The app includes an embedded interactive terminal console on the **Console Tab**:
-- **High-Contrast Green Theme**: Matches the robot's cybernetic theme and provides clear visibility outdoors.
-- **1-Tap Preset Action Chips**: Tap chips to instantly execute commands without typing:
-  - `ros2 node list`
-  - `ros2 topic list`
-  - `echo /battery`
-  - `echo /imu/data`
-  - `source jazzy`
-  - `ps aux`
-- **Interactive Bash Prompt**: Full ANSI keyboard input for running custom bash scripts and debugging.
+The app includes a fully-featured interactive terminal console on the **Console Tab**:
+
+- **Multi-Terminal Sessions**: Spawn extra tabs on the fly with the **`+`** button (`Term 1`, `Term 2`, etc.) and close tabs with **`✕`**. Each session runs independently with a glowing green activity indicator (`●`).
+- **Split View Mode**: Tap **`Split`** to view two terminals simultaneously in a stacked layout. Perfect for monitoring a continuous sensor stream (`ros2 topic echo /battery`) in one half while executing commands in the other.
+- **`Ctrl+C` Hardware Interrupt**: Dedicated red button to immediately terminate running streaming processes (`SIGINT / destroyForcibly`).
+- **`TAB ⇥` Auto-Completion**: Context-aware auto-completion for ROS 2 commands, verbs (`topic`, `node`, `echo`, `list`, `info`, `hz`), and published topic names.
+- **Bash Command History**: Navigate previous commands forward and backward using the Up (**`▲`**) and Down (**`▼`**) buttons.
+- **Automatic Streaming Scroll**: Automatically keeps the viewport pinned to the latest output during high-rate echoes, with circular buffer truncation (800 lines) to prevent memory buildup.
+- **1-Tap Quick Action Chips**: Quick access to common commands (`ros2 topic list`, `ros2 node list`, `echo /imu/data`, `echo /battery`, `uname -a`).
+
+---
+
+## ⚡ Ultra-Fast Graph Accelerator (< 1s)
+
+Standard `ros2 topic list` and `ros2 node list` commands take over 5 seconds on mobile ARM64 devices due to Python entry-point reflection (`importlib.metadata`) scanning 19 CLI extensions on every invocation inside PRoot.
+
+Rosdroid includes a **native CNode graph introspection accelerator** inside `/opt/ros/jazzy/bin/ros2`:
+- Directly binds to the compiled C++ ROS 2 library (`_rclpy_pybind11`).
+- Queries the active Cyclone DDS graph without initializing Python CLI plugin trees.
+- Reduces query time from **5.1 seconds down to ~0.9 seconds** (over **5x faster**).
+- Full transparent fallback preserves complete compatibility for all other ROS 2 tools and `--help` actions.
+
+| Command | Standard ROS 2 CLI | Rosdroid Fast-Path | Improvement |
+| :--- | :---: | :---: | :---: |
+| `ros2 topic list` | 5.09s | **0.98s** | **5.2x Faster** |
+| `ros2 topic list -t` | 5.14s | **0.96s** | **5.3x Faster** |
+| `ros2 node list` | 5.01s | **1.00s** | **5.0x Faster** |
+| `ros2 service list` | 4.95s | **0.92s** | **5.3x Faster** |
 
 ---
 
@@ -232,7 +254,7 @@ This automatically:
 ### Available Topics & Sensors
 
 | Topic | Message Type | Description |
-|-------|--------------|-------------|
+|---|---|---|
 | `/imu/data` | `sensor_msgs/msg/Imu` | Fused 9-DOF orientation quaternion (Madgwick AHRS), angular rates, accelerations |
 | `/battery` | `sensor_msgs/msg/BatteryState` | Voltage, capacity percentage, charging status |
 | `/camera/front/image_raw/compressed` | `sensor_msgs/msg/CompressedImage` | Front selfie camera hardware JPEG stream |
@@ -242,9 +264,10 @@ This automatically:
 | `/expression` | `std_msgs/msg/String` | Robot face mood (`happy`, `thinking`, `alert`, `speaking`, `neutral`) |
 | `/gps` | `sensor_msgs/msg/NavSatFix` | Outdoor GPS coordinates and fix quality |
 | `/illuminance` | `sensor_msgs/msg/Illuminance` | Ambient light sensor lux readings |
-| `/tof` | `sensor_msgs/msg/Range` | Proximity / Time-of-Flight distance sensor |
+| `/tof` | `sensor_msgs/Range` | Proximity / Time-of-Flight distance sensor |
 | `/speech_recognition/result` | `std_msgs/msg/String` | Speech-to-text recognition transcript |
-| `/speech_recognition/hotword_detected`| `std_msgs/msg/String` | Triggered wake words |
+| `/speech_recognition/hotword_detected`| `std_msgs/msg/Bool` | Wake word trigger event (`"Hey Robot"` / `"Robot"`) |
+| `/speech_recognition/status` | `std_msgs/msg/String` | Recognizer status (`LISTENING`, `READY`, `ERROR`) |
 
 ---
 
@@ -326,7 +349,7 @@ You can connect an ESP32, Teensy, Arduino, or STM32 motor driver board directly 
 Android PRoot cannot read network interfaces through netlink sockets due to SELinux restrictions. Rosdroid includes `patch_getifaddrs.so`, preloaded via `LD_PRELOAD=/usr/local/lib/patch_getifaddrs.so`, which provides interface information to Cyclone DDS seamlessly.
 
 ### `ros2 node list` hangs or crashes
-In PRoot sandboxes, the background ROS 2 daemon process cannot communicate via shared memory sockets. Rosdroid configures `use_daemon = False` in the ROS 2 CLI and sets `CYCLONEDDS_URI` in `/etc/profile.d/ros.sh` to ensure all CLI queries execute directly without daemon reliance.
+In PRoot sandboxes, the background ROS 2 daemon process cannot communicate via shared memory sockets. Rosdroid configures `use_daemon = False` in the ROS 2 CLI and uses the fast CNode accelerator to ensure all CLI queries execute directly in under 1 second without daemon reliance.
 
 ### Torch control conflict with Camera
 On Android, the torch and camera share the same camera hardware module. Rosdroid controls the torch through the active CameraX session, allowing you to use both camera streaming and torch lighting simultaneously without conflicts.

@@ -77,7 +77,7 @@ Rosdroid uses a four-tier architecture designed to run real-time robotics withou
 
 ### 3. PRoot Guest Container Layer
 - **`PRootManager.kt`**: Executes the sandboxed guest container using `libproot.so`. Binds `/dev`, `/proc`, `/sys`, and sets up Android-compatible environment variables (`TMPDIR`, `LD_PRELOAD`, `PATH`).
-- **`RemoteAccessManager.kt`**: Manages Dropbear SSH daemons on ports `2222` and `2224`. Generates host keys and verifies process health.
+- **`RemoteAccessManager.kt`**: Manages Dropbear SSH daemons on ports `2222` (`rosdroid`) and `2224` (`root`). Generates host keys and verifies process health.
 
 ### 4. ROS 2 Jazzy & DDS Subsystem
 - **Core Node**: `/rosdroid_robot` running inside PRoot.
@@ -156,6 +156,6 @@ adb shell "run-as org.botforge.rosdroid /data/data/org.botforge.rosdroid/lib/lib
 
 ### 3. Connect via SSH
 ```bash
-ssh robot@<phone-ip> -p 2222
+ssh rosdroid@<phone-ip> -p 2222
 # Password: rosdroid
 ```

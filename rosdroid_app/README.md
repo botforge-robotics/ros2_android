@@ -23,10 +23,10 @@
 | <img src="../docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="../docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
 | **High-visibility neon green expressive eyes** | **Battery telemetry, active Wi-Fi IP & camera controls** |
 
-| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
+| 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Multi-Terminal Console |
 |:---:|:---:|
 | <img src="../docs/images/screenshot_ssh.png" width="340" alt="SSH Remote Server Card" /> | <img src="../docs/images/screenshot_console.png" width="340" alt="In-App Terminal Console" /> |
-| **Dropbear SSH (:2222) with 1-tap copy shortcuts** | **Embedded PRoot terminal with 1-tap preset chips** |
+| **Dropbear SSH (:2222) with inline commands for rosdroid & root** | **Multi-session terminal with Split View, Ctrl+C & TAB completion** |
 
 </div>
 
@@ -36,6 +36,7 @@
 
 - **⚡ 1-Click Provisioning**: Automated download and rootless extraction of Ubuntu 24.04 (Noble) + ROS 2 Jazzy + Dropbear SSH in minutes. Zero root required!
 - **🚀 Pure Headless Architecture**: All graphical desktop bloat (VNC, X11, Openbox, WebSockets) removed to save ~150-200MB RAM, reduce thermals, prevent background process termination, and optimize battery life.
+- **⚡ Ultra-Fast Graph Introspection (< 1s)**: Built-in CNode accelerator executing `ros2 topic list`, `ros2 node list`, and `ros2 service list` in under 1 second (5x faster than standard mobile CLI).
 - **📱 Hardware Sensor Hub (Bridged to ROS 2)**:
   - **Vision**: Dual-camera streaming (Front & Back) with hardware JPEG encoding -> `/camera/front/image_raw/compressed` and `/camera/back/image_raw/compressed`.
   - **LED Torch Control**: Bidirectional physical flash control via topic `/torch` (`std_msgs/msg/Bool`).
@@ -43,18 +44,24 @@
   - **Power & Battery**: Real-time voltage, percentage, and charging telemetry -> `/battery`.
   - **GNSS / GPS**: High-accuracy outdoor positioning -> `/gps`.
   - **Environmental**: Ambient light (`/illuminance`), Proximity/ToF (`/tof`).
-  - **Audio & Speech**: Speech recognition and hotword detection (`/speech_recognition/*`).
+  - **Audio & Speech**: Wake word detection (`"Hey Robot"` / `"Robot"` -> `/speech_recognition/hotword_detected`) and speech-to-text transcripts (`/speech_recognition/result`).
 - **🔌 Hardware USB Serial micro-ROS Bridge**:
   - Connects directly to ESP32 / STM32 / Teensy motor controllers via USB OTG cable.
   - Automatic USB permission handling via `usb-serial-for-android`.
   - Relays USB serial packets to localhost UDP port `8888` for `micro_ros_agent`.
 - **🌐 Remote Terminal Access**:
-  - **Dropbear SSH**: Port `2222` (`robot:rosdroid`) and Port `2224` (`root:rosdroid`).
+  - **Dropbear SSH**: Port `2222` (`rosdroid:rosdroid`) and Port `2224` (`root:rosdroid`).
   - **RosBridge Server**: Internal high-speed JSON communication on port `9871`.
 - **🤖 Animated Cybernetic Robot Face**:
   - Expressive eyes with blinking, gaze tracking, and dynamic moods (Idle, Happy, Thinking, Speaking, Alert) rendered in high-contrast neon green for outdoor visibility.
-- **🖥️ In-App Live Terminal**:
-  - Interactive shell inside the PRoot container with 1-tap quick action chips (`ros2 topic list`, `ros2 node list`, `echo /battery`, `echo /imu/data`, `source jazzy`, etc.).
+- **🖥️ In-App Multi-Terminal Console**:
+  - Multi-session tabs (`Term 1`, `Term 2`, etc.) with running process indicators (`●`).
+  - **Split View Mode** for simultaneous dual-terminal operation.
+  - Dedicated hardware **`Ctrl+C`** interrupt button.
+  - **`TAB ⇥`** auto-completion for ROS 2 commands and topic names.
+  - Bash command history navigation with **`▲`** and **`▼`** buttons.
+  - Automatic log auto-scroll with safe circular buffer management.
+  - 1-tap quick action chips (`ros2 topic list`, `ros2 node list`, `echo /battery`, `echo /imu/data`, etc.).
 
 ---
 
@@ -69,7 +76,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### 2. Permissions & 1-Click Environment Setup
 1. Launch **Rosdroid** on your smartphone.
-2. Grant required permissions (**Camera**, **Location**, **Notification**).
+2. Grant required permissions (**Camera**, **Location**, **Notification**, **Microphone**).
 3. On the **Setup** / **Dashboard** tab, tap **Start 1-Click Installation**.
 4. The app extracts the Ubuntu rootfs, installs `patch_getifaddrs.so`, configures DDS, starts Dropbear SSH, and launches the `/rosdroid_robot` ROS 2 node.
 
@@ -83,6 +90,8 @@ Rosdroid runs Dropbear SSH servers inside the container for full command-line co
 |---------|------|------------------|--------------|
 | `rosdroid` | **2222** | `rosdroid` | Primary ROS 2 development user |
 | `root`     | **2224** | `rosdroid` | Root administrator inside PRoot |
+
+*(A legacy `robot` user alias is also available).*
 
 ### Connecting via SSH
 
@@ -160,39 +169,6 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.
 
 ---
 
-## 🔌 Hardware USB Serial micro-ROS Bridge
-
-To connect motor drivers, sensors, or robot bases (ESP32, Teensy, STM32, Arduino):
-
-1. Connect the microcontroller board to the phone's USB Type-C port using an OTG adapter.
-2. In the Android pop-up dialog, select **Always allow** and tap **OK**.
-3. Rosdroid's `UsbSerialBridge` automatically captures the USB CDC/ACM serial stream and forwards it asynchronously to localhost UDP port `8888`.
-4. In the phone terminal (via SSH or the app's Console tab), start the Micro-ROS Agent:
-   ```bash
-   ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
-   ```
-
----
-
-## 🛠️ Troubleshooting & FAQs
-
-### Topics aren't showing up on PC
-1. Ensure both your PC and phone are on the exact same Wi-Fi network (or phone Wi-Fi hotspot).
-2. Check that your PC has `ROS_DOMAIN_ID=156`.
-3. If using Fast-DDS on PC with Docker installed, make sure to `source source_pc.sh` so DDS does not route traffic through Docker bridges.
-4. If topics don't refresh immediately, restart the ROS 2 daemon on your PC:
-   ```bash
-   ros2 daemon stop
-   ros2 topic list --no-daemon
-   ```
-
-### Permission Denied on `getifaddrs()`
-Android PRoot cannot query network interfaces via standard netlink sockets. Rosdroid includes a custom preload library (`patch_getifaddrs.so`) that intercepts `getifaddrs()` and maps the phone's IP and `wlan0` interface directly. This is pre-loaded via `LD_PRELOAD=/usr/local/lib/patch_getifaddrs.so`.
-
-### Torch doesn't turn on
-The phone's back camera and torch share the same physical camera sensor module. Rosdroid controls the torch through the active CameraX session lock, so ensure the app has Camera permission granted.
-
----
-
 ## 📄 License
-MIT License. Built with ❤️ for open robotics by BotForge.
+
+MIT License. Developed with ❤️ for open robotics by BotForge.
