@@ -91,9 +91,9 @@ class PRootManager(private val context: Context) {
                     "export PATH=/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:\$PATH " +
                     "HOME=/root USER=root HOSTNAME=rosdroid TERM=xterm-256color LANG=C.UTF-8 LC_ALL=C.UTF-8 " +
                     "PYTHONUTF8=1 PYTHONIOENCODING=utf-8 " +
-                    "LD_LIBRARY_PATH=/opt/ros/jazzy/lib:/opt/ros/jazzy/lib/aarch64-linux-gnu:/root/rio_ws/install/rio_interfaces/lib:/home/robot/rosdroid_ws/install/test_pubsub/lib:\$LD_LIBRARY_PATH " +
-                    "AMENT_PREFIX_PATH=/opt/ros/jazzy:/root/rio_ws/install/rio_interfaces:/home/robot/rosdroid_ws/install/test_pubsub:\$AMENT_PREFIX_PATH " +
-                    "PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/lib/python3.12/site-packages:/opt/ros/jazzy/local/lib/python3.10/dist-packages:/opt/ros/jazzy/lib/python3.10/site-packages:/root/rio_ws/install/rio_interfaces/local/lib/python3.10/dist-packages:/home/robot/rosdroid_ws/install/test_pubsub/local/lib/python3.10/dist-packages:\$PYTHONPATH " +
+                    "LD_LIBRARY_PATH=/opt/ros/jazzy/lib:/opt/ros/jazzy/lib/aarch64-linux-gnu:/root/rio_ws/install/rio_interfaces/lib:/home/rosdroid/rosdroid_ws/install/test_pubsub/lib:/home/robot/rosdroid_ws/install/test_pubsub/lib:\$LD_LIBRARY_PATH " +
+                    "AMENT_PREFIX_PATH=/opt/ros/jazzy:/root/rio_ws/install/rio_interfaces:/home/rosdroid/rosdroid_ws/install/test_pubsub:/home/robot/rosdroid_ws/install/test_pubsub:\$AMENT_PREFIX_PATH " +
+                    "PYTHONPATH=/opt/ros/jazzy/local/lib/python3.12/dist-packages:/opt/ros/jazzy/lib/python3.12/site-packages:/opt/ros/jazzy/local/lib/python3.10/dist-packages:/opt/ros/jazzy/lib/python3.10/site-packages:/root/rio_ws/install/rio_interfaces/local/lib/python3.10/dist-packages:/home/rosdroid/rosdroid_ws/install/test_pubsub/local/lib/python3.10/dist-packages:/home/robot/rosdroid_ws/install/test_pubsub/local/lib/python3.10/dist-packages:\$PYTHONPATH " +
                     "ROS_DISTRO=jazzy ROS_VERSION=2 ROS_PYTHON_VERSION=3 RMW_IMPLEMENTATION=rmw_cyclonedds_cpp " +
                     "CYCLONEDDS_URI=/etc/cyclonedds/cyclonedds.xml " +
                     "LD_PRELOAD=/usr/local/lib/patch_getifaddrs.so " +
@@ -147,7 +147,19 @@ class PRootManager(private val context: Context) {
     /**
      * Executes an arbitrary ROS 2 command and reads its output line by line.
      */
-    suspend fun runCommand(command: String, domainId: Int = 156, onLine: (String) -> Unit): Int = withContext(Dispatchers.IO) {
+    suspend fun runCommand(command: String, domainId: Int = 156, onLine: (String) -> Unit): Int {
+        return runStreamingCommand(command, domainId, null, onLine)
+    }
+
+    /**
+     * Executes an arbitrary ROS 2 command with process handle callback for interruption (Ctrl+C).
+     */
+    suspend fun runStreamingCommand(
+        command: String,
+        domainId: Int = 156,
+        onProcessCreated: ((Process) -> Unit)? = null,
+        onLine: (String) -> Unit
+    ): Int = withContext(Dispatchers.IO) {
         try {
             if (!prootBinary.exists()) {
                 onLine("PRoot binary initializing at ${prootBinary.absolutePath}...")
@@ -155,7 +167,8 @@ class PRootManager(private val context: Context) {
                     .directory(rootfsDir)
                     .redirectErrorStream(true)
                     .start()
-                val reader = BufferedReader(InputStreamReader(directProcess.inputStream))
+                onProcessCreated?.invoke(directProcess)
+                val reader = BufferedReader(InputStreamReader(directProcess.inputStream), 8192)
                 var line: String?
                 while (reader.readLine().also { line = it } != null) {
                     line?.let { onLine(it) }
@@ -164,7 +177,8 @@ class PRootManager(private val context: Context) {
             }
 
             val process = buildProotProcess(command, domainId).start()
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            onProcessCreated?.invoke(process)
+            val reader = BufferedReader(InputStreamReader(process.inputStream), 8192)
             var line: String?
             var count = 0
             while (reader.readLine().also { line = it } != null) {

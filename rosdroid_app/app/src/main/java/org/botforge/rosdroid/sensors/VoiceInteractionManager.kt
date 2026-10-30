@@ -3,6 +3,8 @@ package org.botforge.rosdroid.sensors
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -19,12 +21,15 @@ class VoiceInteractionManager(
     var primaryHotword: String = "Hey Robot"
 ) : RecognitionListener, TextToSpeech.OnInitListener {
 
-    // Supported robust wake words
+    // Supported robust wake words (case-insensitive)
     val supportedHotwords = listOf("hey robot", "robot", "hey jarvis", "computer", "rosdroid", "hey rosdroid")
 
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var speechRecognizer: SpeechRecognizer? = null
     private var textToSpeech: TextToSpeech? = null
     private var isTtsReady = false
+    private var isListeningEnabled = false
+    private var isSpeaking = false
 
     private val _lastRecognizedSpeech = MutableStateFlow("")
     val lastRecognizedSpeech: StateFlow<String> = _lastRecognizedSpeech.asStateFlow()
@@ -48,10 +53,9 @@ class VoiceInteractionManager(
     }
 
     fun start() {
-        if (SpeechRecognizer.isRecognitionAvailable(context)) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(this@VoiceInteractionManager)
-            }
+        isListeningEnabled = true
+        mainHandler.post {
+            initSpeechRecognizer()
             startListening()
         }
 
@@ -60,25 +64,66 @@ class VoiceInteractionManager(
         }
     }
 
-    fun startListening() {
+    private fun initSpeechRecognizer() {
         try {
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            speechRecognizer?.destroy()
+            speechRecognizer = null
+            if (SpeechRecognizer.isRecognitionAvailable(context)) {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+                    setRecognitionListener(this@VoiceInteractionManager)
+                }
+                Log.i(TAG, "SpeechRecognizer created successfully on main looper")
+            } else {
+                Log.w(TAG, "SpeechRecognizer isRecognitionAvailable reported false")
             }
-            speechRecognizer?.startListening(intent)
-            _isListening.value = true
-            onSpeechStatusChanged?.invoke("listening")
         } catch (e: Exception) {
-            Log.e(TAG, "Error starting speech listening", e)
+            Log.e(TAG, "Failed creating SpeechRecognizer", e)
+        }
+    }
+
+    fun startListening() {
+        if (!isListeningEnabled || isSpeaking) return
+
+        mainHandler.post {
+            try {
+                if (speechRecognizer == null) {
+                    initSpeechRecognizer()
+                }
+                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+                    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+                }
+                speechRecognizer?.startListening(intent)
+                _isListening.value = true
+                onSpeechStatusChanged?.invoke("listening")
+                Log.d(TAG, "Speech listening started")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error starting speech listening", e)
+                restartListeningWithDelay(1000)
+            }
         }
     }
 
     fun stopListening() {
-        speechRecognizer?.stopListening()
-        _isListening.value = false
-        onSpeechStatusChanged?.invoke("done")
+        isListeningEnabled = false
+        mainHandler.post {
+            try {
+                speechRecognizer?.stopListening()
+            } catch (ignored: Exception) {}
+            _isListening.value = false
+            onSpeechStatusChanged?.invoke("done")
+        }
+    }
+
+    private fun restartListeningWithDelay(delayMs: Long) {
+        if (!isListeningEnabled || isSpeaking) return
+        mainHandler.postDelayed({
+            if (isListeningEnabled && !isSpeaking) {
+                startListening()
+            }
+        }, delayMs)
     }
 
     fun speak(
@@ -89,6 +134,14 @@ class VoiceInteractionManager(
         if (!isTtsReady || textToSpeech == null) {
             onDone?.invoke()
             return
+        }
+
+        isSpeaking = true
+        mainHandler.post {
+            try {
+                speechRecognizer?.stopListening()
+            } catch (ignored: Exception) {}
+            _isListening.value = false
         }
 
         val utteranceId = "RosdroidTTS_${System.currentTimeMillis()}"
@@ -109,12 +162,16 @@ class VoiceInteractionManager(
 
             override fun onDone(utteranceId: String?) {
                 Log.d(TAG, "TTS finished: $utteranceId")
+                isSpeaking = false
                 onTtsCompleted?.invoke()
+                restartListeningWithDelay(400)
             }
 
             override fun onError(utteranceId: String?) {
                 Log.w(TAG, "TTS error: $utteranceId")
+                isSpeaking = false
                 onTtsCompleted?.invoke()
+                restartListeningWithDelay(400)
             }
         })
 
@@ -153,7 +210,7 @@ class VoiceInteractionManager(
         onSpeechStatusChanged?.invoke("done")
 
         // Automatically restart listening loop for continuous robot voice interaction
-        startListening()
+        restartListeningWithDelay(250)
     }
 
     override fun onPartialResults(partialResults: Bundle?) {
@@ -175,10 +232,32 @@ class VoiceInteractionManager(
     }
 
     override fun onError(error: Int) {
+        val errorMsg = when (error) {
+            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+            SpeechRecognizer.ERROR_CLIENT -> "Client error"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+            SpeechRecognizer.ERROR_NETWORK -> "Network error"
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
+            SpeechRecognizer.ERROR_NO_MATCH -> "No match"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
+            SpeechRecognizer.ERROR_SERVER -> "Server error"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timeout"
+            else -> "Error $error"
+        }
+        Log.w(TAG, "SpeechRecognizer onError: $errorMsg ($error)")
         _isListening.value = false
-        // Auto-restart after timeout/silence
-        if (error == SpeechRecognizer.ERROR_NO_MATCH || error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-            startListening()
+
+        if (!isListeningEnabled || isSpeaking) return
+
+        if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY || error == SpeechRecognizer.ERROR_CLIENT) {
+            mainHandler.postDelayed({
+                if (isListeningEnabled && !isSpeaking) {
+                    initSpeechRecognizer()
+                    startListening()
+                }
+            }, 500)
+        } else {
+            restartListeningWithDelay(350)
         }
     }
 
@@ -196,13 +275,18 @@ class VoiceInteractionManager(
     override fun onEvent(eventType: Int, params: Bundle?) {}
 
     fun stop() {
-        speechRecognizer?.destroy()
-        speechRecognizer = null
-        textToSpeech?.stop()
-        textToSpeech?.shutdown()
-        textToSpeech = null
-        isTtsReady = false
-        _isListening.value = false
+        isListeningEnabled = false
+        mainHandler.post {
+            try {
+                speechRecognizer?.destroy()
+            } catch (ignored: Exception) {}
+            speechRecognizer = null
+            textToSpeech?.stop()
+            textToSpeech?.shutdown()
+            textToSpeech = null
+            isTtsReady = false
+            _isListening.value = false
+        }
     }
 
     companion object {

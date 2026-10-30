@@ -516,18 +516,23 @@ class RootfsInstaller(private val context: Context) {
         }
         rootBashrc.setReadable(true, false)
 
-        val robotBashrc = File(rootfsDir, "home/robot/.bashrc").apply { parentFile?.mkdirs() }
-        if (robotBashrc.exists()) {
-            val oldTxt = robotBashrc.readText()
-            if (oldTxt.contains("ROS_DISTRO=humble")) {
-                robotBashrc.writeText(oldTxt.replace("humble", "jazzy"))
-            } else if (!oldTxt.contains("ROS_DISTRO=jazzy")) {
-                robotBashrc.appendText("\n" + shellInit)
+        fun setupUserBashrc(homePath: String) {
+            val userBashrc = File(rootfsDir, "$homePath/.bashrc").apply { parentFile?.mkdirs() }
+            if (userBashrc.exists()) {
+                val oldTxt = userBashrc.readText()
+                if (oldTxt.contains("ROS_DISTRO=humble")) {
+                    userBashrc.writeText(oldTxt.replace("humble", "jazzy"))
+                } else if (!oldTxt.contains("ROS_DISTRO=jazzy")) {
+                    userBashrc.appendText("\n" + shellInit)
+                }
+            } else {
+                userBashrc.writeText(shellInit)
             }
-        } else {
-            robotBashrc.writeText(shellInit)
+            userBashrc.setReadable(true, false)
         }
-        robotBashrc.setReadable(true, false)
+
+        setupUserBashrc("home/rosdroid")
+        setupUserBashrc("home/robot")
 
         // Ensure permissions on core /etc files
         File(etcDir, "passwd").setReadable(true, false)
@@ -546,15 +551,28 @@ class RootfsInstaller(private val context: Context) {
             homeDir.setReadable(true, false)
             homeDir.setWritable(true, true)
             homeDir.setExecutable(true, false)
-            val robotHome = File(homeDir, "robot").apply { mkdirs() }
-            robotHome.setReadable(true, false)
-            robotHome.setWritable(true, true) // owner writable only (not world-writable!)
-            robotHome.setExecutable(true, false)
-            File(robotHome, ".bashrc").setReadable(true, false)
-            File(robotHome, ".profile").setReadable(true, false)
-            val robotBashProfile = File(robotHome, ".bash_profile")
-            robotBashProfile.writeText("[ -f ~/.bashrc ] && . ~/.bashrc\n")
-            robotBashProfile.setReadable(true, false)
+
+            val rosdroidHome = File(homeDir, "rosdroid").apply { mkdirs() }
+            rosdroidHome.setReadable(true, false)
+            rosdroidHome.setWritable(true, true)
+            rosdroidHome.setExecutable(true, false)
+            File(rosdroidHome, ".bashrc").setReadable(true, false)
+            File(rosdroidHome, ".profile").setReadable(true, false)
+            val rosdroidBashProfile = File(rosdroidHome, ".bash_profile")
+            rosdroidBashProfile.writeText("[ -f ~/.bashrc ] && . ~/.bashrc\n")
+            rosdroidBashProfile.setReadable(true, false)
+
+            val robotHome = File(homeDir, "robot")
+            if (!robotHome.exists()) {
+                try {
+                    Os.symlink("rosdroid", robotHome.absolutePath)
+                } catch (e: Exception) {
+                    robotHome.mkdirs()
+                    robotHome.setReadable(true, false)
+                    robotHome.setWritable(true, true)
+                    robotHome.setExecutable(true, false)
+                }
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Failed setting home permissions", e)
         }
@@ -766,8 +784,11 @@ class RootfsInstaller(private val context: Context) {
 
             if (passwdFile.exists()) {
                 val passwdContent = passwdFile.readText()
+                if (!passwdContent.contains("rosdroid:")) {
+                    passwdFile.appendText("rosdroid:x:1000:1000:Rosdroid User:/home/rosdroid:/bin/bash\n")
+                }
                 if (!passwdContent.contains("robot:")) {
-                    passwdFile.appendText("robot:x:1000:1000:Rosdroid Robot:/home/robot:/bin/bash\n")
+                    passwdFile.appendText("robot:x:1001:1000:Rosdroid Robot:/home/rosdroid:/bin/bash\n")
                 }
                 passwdFile.setReadable(true, false)
             }
@@ -779,10 +800,14 @@ class RootfsInstaller(private val context: Context) {
                 val shadowLines = shadowFile.readLines().toMutableList()
                 val newShadow = shadowLines.map { line ->
                     if (line.startsWith("root:")) "root:$hashToUse:20754:0:99999:7:::"
+                    else if (line.startsWith("rosdroid:")) "rosdroid:$hashToUse:20754:0:99999:7:::"
                     else if (line.startsWith("robot:")) "robot:$hashToUse:20754:0:99999:7:::"
                     else line
                 }.toMutableList()
 
+                if (newShadow.none { it.startsWith("rosdroid:") }) {
+                    newShadow.add("rosdroid:$hashToUse:20754:0:99999:7:::")
+                }
                 if (newShadow.none { it.startsWith("robot:") }) {
                     newShadow.add("robot:$hashToUse:20754:0:99999:7:::")
                 }
@@ -791,6 +816,7 @@ class RootfsInstaller(private val context: Context) {
                 shadowFile.writeText(
                     "root:$hashToUse:20754:0:99999:7:::\n" +
                     "daemon:*:20754:0:99999:7:::\n" +
+                    "rosdroid:$hashToUse:20754:0:99999:7:::\n" +
                     "robot:$hashToUse:20754:0:99999:7:::\n"
                 )
             }
@@ -798,6 +824,8 @@ class RootfsInstaller(private val context: Context) {
 
             // Sudoers
             val sudoersDir = File(etcDir, "sudoers.d").apply { mkdirs() }
+            File(sudoersDir, "rosdroid").writeText("rosdroid ALL=(ALL:ALL) NOPASSWD: ALL\n")
+            File(sudoersDir, "rosdroid").setReadable(true, false)
             File(sudoersDir, "robot").writeText("robot ALL=(ALL:ALL) NOPASSWD: ALL\n")
             File(sudoersDir, "robot").setReadable(true, false)
         } catch (e: Exception) {

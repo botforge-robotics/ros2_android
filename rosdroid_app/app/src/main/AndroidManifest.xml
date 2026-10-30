@@ -30,6 +30,13 @@
     <uses-feature android:name="android.hardware.sensor.gyroscope" android:required="false" />
     <uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
 
+    <!-- Speech Recognition Queries for Android 11+ (API 30+) -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
+
     <application
         android:name=".RosdroidApplication"
         android:allowBackup="true"

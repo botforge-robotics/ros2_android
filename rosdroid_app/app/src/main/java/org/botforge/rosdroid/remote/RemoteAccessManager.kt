@@ -5,7 +5,7 @@ import org.botforge.rosdroid.core.PRootManager
 
 data class RemoteAccessConfig(
     val sshPort: Int = 2222,
-    val sshUsername: String = "robot",
+    val sshUsername: String = "rosdroid",
     val rosBridgePort: Int = 9090
 )
 

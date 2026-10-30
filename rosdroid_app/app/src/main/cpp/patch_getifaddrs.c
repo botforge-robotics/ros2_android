@@ -406,7 +406,7 @@ static void init_cwd_locked(void)
     if (geteuid() == 0) {
         snprintf(current_working_dir, sizeof(current_working_dir), "/root");
     } else {
-        snprintf(current_working_dir, sizeof(current_working_dir), "/home/robot");
+        snprintf(current_working_dir, sizeof(current_working_dir), "/home/rosdroid");
     }
 }
 
@@ -414,7 +414,7 @@ static void init_cwd_locked(void)
 int chdir(const char *path)
 {
     if (!path || path[0] == '\0') {
-        path = (geteuid() == 0) ? "/root" : "/home/robot";
+        path = (geteuid() == 0) ? "/root" : "/home/rosdroid";
     }
     typedef int (*orig_chdir_fn)(const char *);
     static orig_chdir_fn orig_chdir = NULL;
@@ -523,7 +523,7 @@ struct passwd *getpwnam(const char *name)
     struct passwd *pw = orig_getpwnam ? orig_getpwnam(name) : NULL;
     if (pw) {
         if (!pw->pw_dir || pw->pw_dir[0] == '\0') {
-            pw->pw_dir = (pw->pw_name && strcmp(pw->pw_name, "root") == 0) ? "/root" : "/home/robot";
+            pw->pw_dir = (pw->pw_name && strcmp(pw->pw_name, "root") == 0) ? "/root" : "/home/rosdroid";
         }
         if (!pw->pw_shell || pw->pw_shell[0] == '\0') {
             pw->pw_shell = "/bin/bash";
@@ -541,7 +541,7 @@ struct passwd *getpwuid(uid_t uid)
     struct passwd *pw = orig_getpwuid ? orig_getpwuid(uid) : NULL;
     if (pw) {
         if (!pw->pw_dir || pw->pw_dir[0] == '\0') {
-            pw->pw_dir = (uid == 0) ? "/root" : "/home/robot";
+            pw->pw_dir = (uid == 0) ? "/root" : "/home/rosdroid";
         }
         if (!pw->pw_shell || pw->pw_shell[0] == '\0') {
             pw->pw_shell = "/bin/bash";
@@ -554,7 +554,7 @@ struct passwd *getpwuid(uid_t uid)
 uid_t getuid(void)
 {
     const char *user = getenv("USER");
-    if (user && strcmp(user, "robot") == 0) {
+    if (user && (strcmp(user, "rosdroid") == 0 || strcmp(user, "robot") == 0)) {
         return 1000;
     }
     typedef uid_t (*orig_geteuid_fn)(void);
@@ -566,7 +566,7 @@ uid_t getuid(void)
 uid_t geteuid(void)
 {
     const char *user = getenv("USER");
-    if (user && strcmp(user, "robot") == 0) {
+    if (user && (strcmp(user, "rosdroid") == 0 || strcmp(user, "robot") == 0)) {
         return 1000;
     }
     typedef uid_t (*orig_geteuid_fn)(void);
@@ -578,7 +578,7 @@ uid_t geteuid(void)
 gid_t getgid(void)
 {
     const char *user = getenv("USER");
-    if (user && strcmp(user, "robot") == 0) {
+    if (user && (strcmp(user, "rosdroid") == 0 || strcmp(user, "robot") == 0)) {
         return 1000;
     }
     typedef gid_t (*orig_getegid_fn)(void);
@@ -590,7 +590,7 @@ gid_t getgid(void)
 gid_t getegid(void)
 {
     const char *user = getenv("USER");
-    if (user && strcmp(user, "robot") == 0) {
+    if (user && (strcmp(user, "rosdroid") == 0 || strcmp(user, "robot") == 0)) {
         return 1000;
     }
     typedef gid_t (*orig_getegid_fn)(void);

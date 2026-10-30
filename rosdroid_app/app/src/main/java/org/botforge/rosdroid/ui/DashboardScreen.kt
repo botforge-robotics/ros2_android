@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -407,7 +408,7 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("SSH Username:", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                            Text("robot (or root)", color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text("rosdroid (or root)", color = Color(0xFF00E676), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
 
                         Row(
@@ -416,16 +417,7 @@ fun DashboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("SSH Password:", color = Color(0xFF94A3B8), fontSize = 13.sp)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("rosdroid", color = Color(0xFFFFD600), fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                TextButton(
-                                    onClick = { copyToClipboard(context, "SSH Password", "rosdroid") },
-                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
-                                ) {
-                                    Text("Copy", color = Color(0xFF38BDF8), fontSize = 11.sp)
-                                }
-                            }
+                            Text("rosdroid", color = Color(0xFFFFD600), fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
 
                         Row(
@@ -436,18 +428,17 @@ fun DashboardScreen(
                             Text("SSH Port:", color = Color(0xFF94A3B8), fontSize = 13.sp)
                             Text("2222", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                         }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Connect from PC:", color = Color(0xFF94A3B8), fontSize = 13.sp)
+                            Text("ssh rosdroid@${status.ipAddress} -p 2222", color = Color(0xFF38BDF8), fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+                        }
                     }
                 }
-
-                val sshCmd = "ssh robot@${status.ipAddress} -p 2222"
-                RemoteActionRow(
-                    title = "Connect Terminal from PC",
-                    subtitle = sshCmd,
-                    buttonText = "Copy SSH",
-                    onClick = {
-                        copyToClipboard(context, "SSH Command", sshCmd)
-                    }
-                )
             }
         }
 

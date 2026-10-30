@@ -21,7 +21,7 @@
 | 🤖 Animated Cybernetic Robot Face | 📊 Real-Time Telemetry & Sensors |
 |:---:|:---:|
 | <img src="../docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="../docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
-| **High-visibility neon green expressive eyes** | **Battery BMS, active Wi-Fi IP & camera controls** |
+| **High-visibility neon green expressive eyes** | **Battery telemetry, active Wi-Fi IP & camera controls** |
 
 | 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
 |:---:|:---:|
@@ -81,14 +81,14 @@ Rosdroid runs Dropbear SSH servers inside the container for full command-line co
 
 | Account | Port | Default Password | Access Level |
 |---------|------|------------------|--------------|
-| `robot` | **2222** | `rosdroid` | Standard ROS 2 development user |
-| `root`  | **2224** | `rosdroid` | Root administrator inside PRoot |
+| `rosdroid` | **2222** | `rosdroid` | Primary ROS 2 development user |
+| `root`     | **2224** | `rosdroid` | Root administrator inside PRoot |
 
 ### Connecting via SSH
 
 ```bash
-# Connect as standard robot user
-ssh robot@<phone-ip> -p 2222
+# Connect as rosdroid user
+ssh rosdroid@<phone-ip> -p 2222
 
 # Or connect as root
 ssh root@<phone-ip> -p 2224

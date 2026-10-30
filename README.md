@@ -61,7 +61,7 @@ By installing Rosdroid on an Android phone, you eliminate hundreds of dollars in
 | **Single Board Computer** *(Raspberry Pi 5 / Jetson, $80-$150)* | **Octa-Core ARM64 CPU + PRoot Ubuntu 24.04** | Core ROS 2 Node (`/rosdroid_robot`) |
 | **Dual Camera Modules** *(Pi Cam V3 / Webcams, $50-$80)* | **High-Res Front & Back Cameras (Hardware JPEG)** | `/camera/front/image_raw/compressed`<br>`/camera/back/image_raw/compressed` |
 | **9-DOF IMU Breakout** *(BNO055 / MPU6050, $15-$35)* | **Built-in IMU fused with Native C++ Madgwick** | `/imu/data` *(quaternion orientation & rates)* |
-| **Power Bank / UPS Battery Hat** *($30-$50)* | **Built-in 4000-5000 mAh Li-Po Battery + BMS** | `/battery` *(voltage, %, charge status)* |
+| **Power Bank / UPS Battery Hat** *($30-$50)* | **Built-in 4000-5000 mAh Rechargeable Battery** | `/battery` *(voltage, %, charge status)* |
 | **Robot Display / OLED Screen** *($30-$60)* | **AMOLED Touch Display (Animated Cyber Eyes)** | `/expression` *(happy, thinking, alert, etc.)* |
 | **External Robot Spotlight / LED** *($10)* | **High-Lumen Camera LED Flash Torch** | `/torch` *(hardware toggle on/off)* |
 | **GPS / GNSS Receiver** *(NEO-6M, $20)* | **Built-in Multi-Constellation GPS Receiver** | `/gps` *(`sensor_msgs/NavSatFix`)* |
@@ -80,7 +80,7 @@ By installing Rosdroid on an Android phone, you eliminate hundreds of dollars in
 | 🤖 Animated Cybernetic Robot Face | 📊 Real-Time Telemetry & Sensors |
 |:---:|:---:|
 | <img src="docs/images/screenshot_face.png" width="340" alt="Robot Face Screen" /> | <img src="docs/images/screenshot_dashboard.png" width="340" alt="Dashboard Screen" /> |
-| **High-visibility neon green expressive eyes** | **Battery BMS, active Wi-Fi IP & camera controls** |
+| **High-visibility neon green expressive eyes** | **Battery telemetry, active Wi-Fi IP & camera controls** |
 
 | 💻 Remote Terminal Access (SSH Server) | 🖥️ In-App Green Terminal Console |
 |:---:|:---:|
@@ -167,13 +167,13 @@ Rosdroid runs Dropbear SSH servers directly inside the PRoot sandbox:
 
 | Account | Port | Default Password | Recommended Use |
 |---------|------|------------------|-----------------|
-| `robot` | **2222** | `rosdroid` | Day-to-day ROS 2 development, running nodes, scripts |
-| `root`  | **2224** | `rosdroid` | Package management (`apt update`), root administration |
+| `rosdroid` | **2222** | `rosdroid` | Primary user for ROS 2 development, nodes, scripts |
+| `root`     | **2224** | `rosdroid` | Package management (`apt update`), root administration |
 
 #### Connect from your PC / Mac / Tablet:
 ```bash
-# Connect as standard robot user
-ssh robot@<phone-ip> -p 2222
+# Connect as rosdroid user
+ssh rosdroid@<phone-ip> -p 2222
 
 # Or connect as root
 ssh root@<phone-ip> -p 2224

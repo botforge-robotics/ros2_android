@@ -60,11 +60,15 @@ RUN gcc -shared -fPIC -o /usr/local/lib/patch_getifaddrs.so /tmp/patch_getifaddr
     && echo "/usr/local/lib/patch_getifaddrs.so" > /etc/ld.so.preload \
     && rm /tmp/patch_getifaddrs.c
 
-# 7. Create default robot user
-RUN useradd -m -s /bin/bash -u 1000 robot \
-    && echo "robot:robot" | chpasswd \
-    && echo "root:root" | chpasswd \
-    && echo "robot ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# 7. Create default rosdroid user
+RUN useradd -m -s /bin/bash -u 1000 rosdroid \
+    && echo "rosdroid:rosdroid" | chpasswd \
+    && echo "root:rosdroid" | chpasswd \
+    && echo "rosdroid ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && useradd -m -s /bin/bash -u 1001 -g rosdroid robot \
+    && echo "robot:rosdroid" | chpasswd \
+    && echo "robot ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+    && ln -s /home/rosdroid /home/robot_alias
 
 # 8. Setup default environment
 COPY configs/cyclonedds.xml /etc/cyclonedds/cyclonedds.xml
