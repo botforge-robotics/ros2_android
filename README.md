@@ -4,7 +4,7 @@
 [![Platform](https://img.shields.io/badge/platform-Ubuntu_24.04_Noble-orange.svg)](https://ubuntu.com/)
 [![Architecture](https://img.shields.io/badge/architecture-ARM64_aarch64-green.svg)](https://arm.com)
 [![Mode](https://img.shields.io/badge/mode-Headless_Server-brightgreen.svg)](#-why-headless-server)
-[![Release](https://img.shields.io/badge/release-v1.0.0-brightgreen.svg)](https://github.com/botforge-robotics/ros2_android/releases)
+[![Release](https://img.shields.io/badge/release-v1.1.0-brightgreen.svg)](https://github.com/botforge-robotics/ros2_android/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/botforge-robotics/ros2_android/actions/workflows/ci.yml/badge.svg)](https://github.com/botforge-robotics/ros2_android/actions/workflows/ci.yml)
 
